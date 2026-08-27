@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L'Heure du Crime — Console du Meneur de Jeu</title>
+<meta name="description" content="Compagnon du Meneur de Jeu pour la murder party L'Heure du Crime : composer la table, bâtir un Cercle isolant, mener la partie.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <svg class="clock" viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="44" fill="none" stroke="#a9842f" stroke-width="2"/>
+    <circle cx="50" cy="50" r="37" fill="none" stroke="#a9842f" stroke-width="1"/>
+    <line x1="50" y1="50" x2="50" y2="26" stroke="#6e222b" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="50" y1="50" x2="66" y2="54" stroke="#6e222b" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="50" cy="50" r="2.6" fill="#6e222b"/>
+  </svg>
+  <h1>L'Heure du Crime</h1>
+  <div class="sub">Console du Meneur de Jeu</div>
+</header>
+
+<nav class="tabs">
+  <button data-tab="table" class="active">Composer la table</button>
+  <button data-tab="cercle">Bâtir un Cercle</button>
+  <button data-tab="conduite">Mener la partie</button>
+  <button data-tab="aide">Aide-mémoire</button>
+</nav>
+
+<main>
+  <!-- ============ TABLE ============ -->
+  <section id="table" class="panel active">
+    <h2 class="sec">Combien de convives&nbsp;?</h2>
+    <div class="rowflex">
+      <label>Joueurs :
+        <select id="npl"></select>
+      </label>
+      <span class="muted">(hors Meneur de Jeu)</span>
+    </div>
+    <div id="compo"></div>
+  </section>
+
+  <!-- ============ CERCLE ============ -->
+  <section id="cercle" class="panel">
+    <h2 class="sec">Charger un scénario d'initiation</h2>
+    <div class="rowflex" id="scenBtns"></div>
+
+    <h2 class="sec">…ou générer un Cercle sur mesure</h2>
+    <p class="muted">Cochez les personnages <b>présents</b> à votre table, puis laissez la console
+      isoler un Cercle de trois suspects sur les traits publics.</p>
+    <div class="rowflex" style="margin:6px 0">
+      <button class="ghost" id="selDefault">Sélection type (14)</button>
+      <button class="ghost" id="selClear">Tout décocher</button>
+      <span class="muted"><span id="selCount">0</span> cochés</span>
+    </div>
+    <div class="grid" id="castGrid"></div>
+    <div class="rowflex" style="margin-top:10px">
+      <button class="act" id="genCercle">Trouver un Cercle isolant</button>
+    </div>
+    <div id="cercleOut"></div>
+  </section>
+
+  <!-- ============ CONDUITE ============ -->
+  <section id="conduite" class="panel">
+    <h2 class="sec">Ouverture</h2>
+    <ul class="checklist" id="ouverture">
+      <li>Planter le décor + découverte du corps (un PNJ, jamais un joueur)</li>
+      <li>Annoncer le recensement partiel (total des perturbateurs, sans le détail)</li>
+      <li>Distribuer personnages + Atouts + 1 carte Secret / joueur</li>
+      <li>Reconnaissances secrètes (alliés des Malfaiteurs, cible du Vengeur ; « Rien à signaler » aux autres)</li>
+      <li>Distribuer 2 Rumeurs / joueur + consigne d'échange</li>
+      <li>Prévenir : « mes apartés ne sont jamais un indice »</li>
+      <li>Présenter le dossier d'ouverture (1 Indice + 1 par tranche de ~6 joueurs)</li>
+    </ul>
+
+    <h2 class="sec">Compteurs</h2>
+    <div class="card">
+      <div class="rowflex" style="justify-content:space-between">
+        <div><h3 class="sub">Actes d'accusation restants</h3>
+          <div class="counter"><button id="actMinus">−</button><span class="val" id="actVal">2</span><button id="actPlus">+</button></div>
+          <p class="muted" style="font-size:13px">2 pour toute la partie · chaque accusation en coûte un, quel que soit son résultat.</p>
+        </div>
+        <div><h3 class="sub">Tour</h3>
+          <div class="counter"><button id="tourMinus">−</button><span class="val" id="tourVal">1</span><button id="tourPlus">+</button></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="sec">Investigation — ordre de la boîte à requêtes</h2>
+    <div class="card">
+      <p><span class="pill">1 · Protection</span> <span class="pill">2 · Perturbation</span>
+         <span class="pill">3 · Information</span> <span class="pill">4 · Meurtre</span></p>
+      <p class="muted" style="font-size:13px">Tout le monde dépose un billet (même « je passe ») ; réponse pliée à chacun. Rien avant le Carillon.</p>
+    </div>
+
+    <h2 class="sec">Second meurtre &amp; Fantôme</h2>
+    <div class="tip">Au cœur de la partie (ou plus tôt si le Coupable est <b>enhardi</b>), il frappe une
+      <b>seule fois de plus</b> — jamais un Malfaiteur. La victime devient <b>Fantôme</b> : elle garde son
+      <b>vote final</b> et révèle un <b>dernier indice</b> qui fait avancer l'enquête.</div>
+
+    <h2 class="sec">Qui l'emporte</h2>
+    <table>
+      <tr><th>Camp</th><th>Victoire si…</th></tr>
+      <tr><td><b>Enquêteurs</b></td><td>le vrai Coupable est accusé à la majorité avant la fin.</td></tr>
+      <tr><td><b>Malfaiteurs</b></td><td>à la fin, le Coupable n'a jamais été condamné.</td></tr>
+      <tr><td><b>Intrigants</b></td><td>chacun vérifie son objectif personnel, quel que soit le vainqueur.</td></tr>
+    </table>
+  </section>
+
+  <!-- ============ AIDE ============ -->
+  <section id="aide" class="panel">
+    <h2 class="sec">Les garde-fous (à ne jamais toucher)</h2>
+    <div class="warn">Cercle de <b>3</b> · isolé par <b>≥ 2 traits publics flous</b> · <b>2 Actes</b> ·
+      condamnation = <b>arrestation</b> · le Coupable n'a <b>aucune échappatoire personnelle</b> ni <b>vrai Alibi</b>.</div>
+    <h2 class="sec">La règle de l'entonnoir</h2>
+    <p>Chaque Indice public vise un trait <b>partagé par plusieurs</b> personnages : c'est
+      <b>l'intersection d'au moins deux traits</b> qui isole les trois finalistes. La Pilosité ne sert
+      jamais à isoler (décor et fausse piste).</p>
+    <h2 class="sec">Les deux entonnoirs</h2>
+    <table>
+      <tr><th>Couche</th><th>Support</th><th>Va de…</th></tr>
+      <tr><td>Publique</td><td>Indices (traits publics)</td><td>la table → 3</td></tr>
+      <tr><td>Privée</td><td>Secrets + Rumeurs</td><td>3 → 1</td></tr>
+    </table>
+    <h2 class="sec">Aligner les Secrets</h2>
+    <p><b>Coupable</b> → une carte Secret <b>accablante</b> (2 faits à charge, aucune décharge) : aucune
+      exonération, il ne peut que bluffer. <b>Chaque leurre</b> → une carte Secret contenant le fait de sa
+      <b>Rumeur-décharge</b> : sa décharge circule et le blanchit.</p>
+    <h2 class="sec">Difficulté avancée</h2>
+    <p>Coupez le Corbeau · armez les Complices (Maquilleur, Étouffeur, Faussaire, Usurpateur) · fausses
+      pistes plus serrées · un Intrigant comme leurre · retirez le levier d'Alibi.</p>
+  </section>
+</main>
+
+<footer>
+  L'Heure du Crime — murder party d'enquête victorienne · Console MJ · aucune donnée n'est envoyée, tout tourne dans votre navigateur.
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

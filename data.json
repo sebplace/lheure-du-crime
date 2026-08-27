@@ -1,0 +1,858 @@
+{
+ "cast": [
+  {
+   "num": 1,
+   "nom": "Lord Percival Ashcombe",
+   "role": "héritier du domaine",
+   "genre": "H",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Chevalière",
+    "cheveux": "Poivre-et-sel",
+    "pilosite": "Favoris",
+    "silhouette": "Petit",
+    "signe": "Canne"
+   },
+   "rumeur_charge": "rôdait près de la serre à l'heure du crime",
+   "rumeur_decharge": "ignorait jusqu'à l'existence du coffre"
+  },
+  {
+   "num": 2,
+   "nom": "Docteur Aldous Merrick",
+   "role": "médecin de famille",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Aucune",
+    "cheveux": "Bruns",
+    "pilosite": "Barbe",
+    "silhouette": "Petit",
+    "signe": "Grain de beauté"
+   },
+   "rumeur_charge": "a gravi l'escalier de service en catimini",
+   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+  },
+  {
+   "num": 3,
+   "nom": "Colonel Reginald Blackwood",
+   "role": "officier en retraite",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Aucune",
+    "cheveux": "Noirs",
+    "pilosite": "Favoris",
+    "silhouette": "Mince",
+    "signe": "Aucun"
+   },
+   "rumeur_charge": "a quitté le salon juste avant le cri",
+   "rumeur_decharge": "ne possédait aucune clé de l'étage"
+  },
+  {
+   "num": 4,
+   "nom": "Révérend Thomas Pike",
+   "role": "vicaire du village",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Chevalière",
+    "cheveux": "Poivre-et-sel",
+    "pilosite": "Favoris",
+    "silhouette": "Mince",
+    "signe": "Canne"
+   },
+   "rumeur_charge": "fut aperçu au seuil de la chambre de la victime",
+   "rumeur_decharge": "venait de se réconcilier publiquement avec elle"
+  },
+  {
+   "num": 5,
+   "nom": "Silas Crevier",
+   "role": "majordome",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Alliance",
+    "cheveux": "Noirs",
+    "pilosite": "Moustache",
+    "silhouette": "Petit",
+    "signe": "Lorgnon"
+   },
+   "rumeur_charge": "détenait un double de la clé",
+   "rumeur_decharge": "soupait en tête-à-tête avec le pasteur"
+  },
+  {
+   "num": 6,
+   "nom": "Maître Edmund Fairfax",
+   "role": "notaire de la famille",
+   "genre": "H",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Chevalière",
+    "cheveux": "Bruns",
+    "pilosite": "Favoris",
+    "silhouette": "Petit",
+    "signe": "Lorgnon"
+   },
+   "rumeur_charge": "connaissait la cachette du flacon de poison",
+   "rumeur_decharge": "devait à la victime toute sa fortune"
+  },
+  {
+   "num": 7,
+   "nom": "Oliver Finch",
+   "role": "journaliste au Times",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Aucune",
+    "cheveux": "Chauve",
+    "pilosite": "Moustache",
+    "silhouette": "Mince",
+    "signe": "Grain de beauté"
+   },
+   "rumeur_charge": "avait ses entrées dans le cabinet de la victime",
+   "rumeur_decharge": "se tenait dehors, sous la neige, à la vue de tous"
+  },
+  {
+   "num": 8,
+   "nom": "Capitaine Lucien Duvall",
+   "role": "officier français",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Aucune",
+    "cheveux": "Blonds",
+    "pilosite": "Favoris",
+    "silhouette": "Mince",
+    "signe": "Lorgnon"
+   },
+   "rumeur_charge": "savait où l'arme était rangée",
+   "rumeur_decharge": "héritait de toute façon, sans lever le petit doigt"
+  },
+  {
+   "num": 9,
+   "nom": "Professeur Barnaby Holt",
+   "role": "érudit antiquaire",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Aucune",
+    "cheveux": "Chauve",
+    "pilosite": "Glabre",
+    "silhouette": "Petit",
+    "signe": "Grain de beauté"
+   },
+   "rumeur_charge": "croulait sous les dettes envers la victime",
+   "rumeur_decharge": "n'a pas quitté la bibliothèque de la nuit"
+  },
+  {
+   "num": 10,
+   "nom": "Mr Josiah Thorne",
+   "role": "chef jardinier",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Alliance",
+    "cheveux": "Noirs",
+    "pilosite": "Favoris",
+    "silhouette": "Mince",
+    "signe": "Grain de beauté"
+   },
+   "rumeur_charge": "venait d'apprendre qu'on le déshéritait",
+   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+  },
+  {
+   "num": 11,
+   "nom": "Alfred Nash",
+   "role": "valet de pied",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Aucune",
+    "cheveux": "Chauve",
+    "pilosite": "Glabre",
+    "silhouette": "Mince",
+    "signe": "Lorgnon"
+   },
+   "rumeur_charge": "avait juré, devant témoins, de se venger",
+   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+  },
+  {
+   "num": 12,
+   "nom": "Mr Cornelius Vane",
+   "role": "banquier de la City",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Aucune",
+    "cheveux": "Bruns",
+    "pilosite": "Favoris",
+    "silhouette": "Mince",
+    "signe": "Canne"
+   },
+   "rumeur_charge": "fut jadis l'amant éconduit de la victime",
+   "rumeur_decharge": "n'a jamais su où l'on rangeait l'arme"
+  },
+  {
+   "num": 13,
+   "nom": "Mr Sebastian Rooke",
+   "role": "peintre mondain",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Aucune",
+    "cheveux": "Noirs",
+    "pilosite": "Glabre",
+    "silhouette": "Corpulent",
+    "signe": "Lorgnon"
+   },
+   "rumeur_charge": "possède de solides notions de médecine et de poisons",
+   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+  },
+  {
+   "num": 14,
+   "nom": "Sir Hugo Fenwick",
+   "role": "explorateur décoré",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Aucune",
+    "cheveux": "Blonds",
+    "pilosite": "Barbe",
+    "silhouette": "Corpulent",
+    "signe": "Cicatrice"
+   },
+   "rumeur_charge": "sait crocheter une serrure sans laisser de trace",
+   "rumeur_decharge": "trouva le cabinet fermé et n'y put entrer"
+  },
+  {
+   "num": 15,
+   "nom": "Magistrat Ambrose Kettle",
+   "role": "juge à la retraite",
+   "genre": "H",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Aucune",
+    "cheveux": "Poivre-et-sel",
+    "pilosite": "Barbe",
+    "silhouette": "Grand",
+    "signe": "Canne"
+   },
+   "rumeur_charge": "manie l'épée avec une redoutable adresse",
+   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+  },
+  {
+   "num": 16,
+   "nom": "Mr Nathaniel Crane",
+   "role": "associé en affaires",
+   "genre": "H",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Aucune",
+    "cheveux": "Poivre-et-sel",
+    "pilosite": "Moustache",
+    "silhouette": "Corpulent",
+    "signe": "Lorgnon"
+   },
+   "rumeur_charge": "rôdait près de la serre à l'heure du crime",
+   "rumeur_decharge": "ignorait jusqu'à l'existence du coffre"
+  },
+  {
+   "num": 17,
+   "nom": "Docteur Ignatius Vole",
+   "role": "aliéniste réputé",
+   "genre": "H",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Chevalière",
+    "cheveux": "Roux",
+    "pilosite": "Barbe",
+    "silhouette": "Grand",
+    "signe": "Canne"
+   },
+   "rumeur_charge": "a gravi l'escalier de service en catimini",
+   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+  },
+  {
+   "num": 18,
+   "nom": "Mr Elias Marsh",
+   "role": "antiquaire brocanteur",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Chevalière",
+    "cheveux": "Bruns",
+    "pilosite": "Barbe",
+    "silhouette": "Grand",
+    "signe": "Cicatrice"
+   },
+   "rumeur_charge": "a quitté le salon juste avant le cri",
+   "rumeur_decharge": "ne possédait aucune clé de l'étage"
+  },
+  {
+   "num": 19,
+   "nom": "Lady Vivienne Ashcombe",
+   "role": "la maîtresse de maison",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Chevalière",
+    "cheveux": "Poivre-et-sel",
+    "pilosite": "Glabre",
+    "silhouette": "Grand",
+    "signe": "Canne"
+   },
+   "rumeur_charge": "fut aperçu au seuil de la chambre de la victime",
+   "rumeur_decharge": "venait de se réconcilier publiquement avec elle"
+  },
+  {
+   "num": 20,
+   "nom": "Comtesse Éléonore de Valmont",
+   "role": "aristocrate en exil",
+   "genre": "F",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Chevalière",
+    "cheveux": "Bruns",
+    "pilosite": "Glabre",
+    "silhouette": "Petit",
+    "signe": "Aucun"
+   },
+   "rumeur_charge": "détenait un double de la clé",
+   "rumeur_decharge": "soupait en tête-à-tête avec le pasteur"
+  },
+  {
+   "num": 21,
+   "nom": "Miss Beatrice Hartley",
+   "role": "gouvernante",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Alliance",
+    "cheveux": "Noirs",
+    "pilosite": "Glabre",
+    "silhouette": "Grand",
+    "signe": "Lorgnon"
+   },
+   "rumeur_charge": "connaissait la cachette du flacon de poison",
+   "rumeur_decharge": "devait à la victime toute sa fortune"
+  },
+  {
+   "num": 22,
+   "nom": "Mrs Agnes Doyle",
+   "role": "cuisinière",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Chevalière",
+    "cheveux": "Poivre-et-sel",
+    "pilosite": "Glabre",
+    "silhouette": "Corpulent",
+    "signe": "Aucun"
+   },
+   "rumeur_charge": "avait ses entrées dans le cabinet de la victime",
+   "rumeur_decharge": "se tenait dehors, sous la neige, à la vue de tous"
+  },
+  {
+   "num": 23,
+   "nom": "Rose Tenpenny",
+   "role": "femme de chambre",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Alliance",
+    "cheveux": "Blonds",
+    "pilosite": "Glabre",
+    "silhouette": "Mince",
+    "signe": "Cicatrice"
+   },
+   "rumeur_charge": "savait où l'arme était rangée",
+   "rumeur_decharge": "héritait de toute façon, sans lever le petit doigt"
+  },
+  {
+   "num": 24,
+   "nom": "Miss Ophelia Grey",
+   "role": "actrice de théâtre",
+   "genre": "F",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Alliance",
+    "cheveux": "Noirs",
+    "pilosite": "Glabre",
+    "silhouette": "Grand",
+    "signe": "Canne"
+   },
+   "rumeur_charge": "croulait sous les dettes envers la victime",
+   "rumeur_decharge": "n'a pas quitté la bibliothèque de la nuit"
+  },
+  {
+   "num": 25,
+   "nom": "Mrs Prudence Wickham",
+   "role": "veuve spirite",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Chevalière",
+    "cheveux": "Chauve",
+    "pilosite": "Glabre",
+    "silhouette": "Corpulent",
+    "signe": "Cicatrice"
+   },
+   "rumeur_charge": "venait d'apprendre qu'on le déshéritait",
+   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+  },
+  {
+   "num": 26,
+   "nom": "Sœur Mildred Ashby",
+   "role": "infirmière",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Alliance",
+    "cheveux": "Bruns",
+    "pilosite": "Glabre",
+    "silhouette": "Mince",
+    "signe": "Grain de beauté"
+   },
+   "rumeur_charge": "avait juré, devant témoins, de se venger",
+   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+  },
+  {
+   "num": 27,
+   "nom": "Miss Rosalind Ashcombe",
+   "role": "l'héritière",
+   "genre": "F",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Chevalière",
+    "cheveux": "Blonds",
+    "pilosite": "Glabre",
+    "silhouette": "Corpulent",
+    "signe": "Canne"
+   },
+   "rumeur_charge": "fut jadis l'amant éconduit de la victime",
+   "rumeur_decharge": "n'a jamais su où l'on rangeait l'arme"
+  },
+  {
+   "num": 28,
+   "nom": "Miss Constance Bell",
+   "role": "institutrice",
+   "genre": "F",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Aucune",
+    "cheveux": "Poivre-et-sel",
+    "pilosite": "Glabre",
+    "silhouette": "Petit",
+    "signe": "Cicatrice"
+   },
+   "rumeur_charge": "possède de solides notions de médecine et de poisons",
+   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+  },
+  {
+   "num": 29,
+   "nom": "Madame Lucille Perrot",
+   "role": "modiste parisienne",
+   "genre": "F",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Chevalière",
+    "cheveux": "Bruns",
+    "pilosite": "Glabre",
+    "silhouette": "Petit",
+    "signe": "Lorgnon"
+   },
+   "rumeur_charge": "sait crocheter une serrure sans laisser de trace",
+   "rumeur_decharge": "trouva le cabinet fermé et n'y put entrer"
+  },
+  {
+   "num": 30,
+   "nom": "La Signora Bianca Tosca",
+   "role": "cantatrice",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Alliance",
+    "cheveux": "Chauve",
+    "pilosite": "Glabre",
+    "silhouette": "Petit",
+    "signe": "Aucun"
+   },
+   "rumeur_charge": "manie l'épée avec une redoutable adresse",
+   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+  },
+  {
+   "num": 31,
+   "nom": "Mrs Harriet Sloane",
+   "role": "dame de compagnie",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Chevalière",
+    "cheveux": "Bruns",
+    "pilosite": "Glabre",
+    "silhouette": "Mince",
+    "signe": "Cicatrice"
+   },
+   "rumeur_charge": "rôdait près de la serre à l'heure du crime",
+   "rumeur_decharge": "ignorait jusqu'à l'existence du coffre"
+  },
+  {
+   "num": 32,
+   "nom": "Miss Adelaide Frost",
+   "role": "bibliothécaire",
+   "genre": "F",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Chevalière",
+    "cheveux": "Noirs",
+    "pilosite": "Glabre",
+    "silhouette": "Petit",
+    "signe": "Aucun"
+   },
+   "rumeur_charge": "a gravi l'escalier de service en catimini",
+   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+  },
+  {
+   "num": 33,
+   "nom": "Mrs Cordelia Vance",
+   "role": "veuve d'un armateur",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Alliance",
+    "cheveux": "Noirs",
+    "pilosite": "Glabre",
+    "silhouette": "Mince",
+    "signe": "Canne"
+   },
+   "rumeur_charge": "a quitté le salon juste avant le cri",
+   "rumeur_decharge": "ne possédait aucune clé de l'étage"
+  },
+  {
+   "num": 34,
+   "nom": "Madame Hélène Brassard",
+   "role": "spirite renommée",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Aucune",
+    "cheveux": "Chauve",
+    "pilosite": "Glabre",
+    "silhouette": "Corpulent",
+    "signe": "Canne"
+   },
+   "rumeur_charge": "fut aperçu au seuil de la chambre de la victime",
+   "rumeur_decharge": "venait de se réconcilier publiquement avec elle"
+  },
+  {
+   "num": 35,
+   "nom": "Lady Evelyn Marchmont",
+   "role": "mécène des arts",
+   "genre": "F",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Chevalière",
+    "cheveux": "Blonds",
+    "pilosite": "Glabre",
+    "silhouette": "Mince",
+    "signe": "Cicatrice"
+   },
+   "rumeur_charge": "détenait un double de la clé",
+   "rumeur_decharge": "soupait en tête-à-tête avec le pasteur"
+  },
+  {
+   "num": 36,
+   "nom": "Major Cedric Wainwright",
+   "role": "explorateur de retour des colonies",
+   "genre": "H",
+   "pub": {
+    "main": "Droitier",
+    "bague": "Aucune",
+    "cheveux": "Blonds",
+    "pilosite": "Moustache",
+    "silhouette": "Grand",
+    "signe": "Cicatrice"
+   },
+   "rumeur_charge": "connaissait la cachette du flacon de poison",
+   "rumeur_decharge": "devait à la victime toute sa fortune"
+  },
+  {
+   "num": 37,
+   "nom": "Mr Aloysius Trundle",
+   "role": "horloger du domaine",
+   "genre": "H",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Chevalière",
+    "cheveux": "Poivre-et-sel",
+    "pilosite": "Favoris",
+    "silhouette": "Petit",
+    "signe": "Lorgnon"
+   },
+   "rumeur_charge": "avait ses entrées dans le cabinet de la victime",
+   "rumeur_decharge": "se tenait dehors, sous la neige, à la vue de tous"
+  },
+  {
+   "num": 38,
+   "nom": "Miss Henrietta Cole",
+   "role": "gouvernante en chef",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Aucune",
+    "cheveux": "Poivre-et-sel",
+    "pilosite": "Glabre",
+    "silhouette": "Mince",
+    "signe": "Grain de beauté"
+   },
+   "rumeur_charge": "savait où l'arme était rangée",
+   "rumeur_decharge": "héritait de toute façon, sans lever le petit doigt"
+  },
+  {
+   "num": 39,
+   "nom": "Miss Winifred Ashcombe",
+   "role": "nièce cadette",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Aucune",
+    "cheveux": "Blonds",
+    "pilosite": "Glabre",
+    "silhouette": "Mince",
+    "signe": "Cicatrice"
+   },
+   "rumeur_charge": "croulait sous les dettes envers la victime",
+   "rumeur_decharge": "n'a pas quitté la bibliothèque de la nuit"
+  },
+  {
+   "num": 40,
+   "nom": "Docteure Ada Thorncroft",
+   "role": "botaniste de cabinet",
+   "genre": "F",
+   "pub": {
+    "main": "Gaucher",
+    "bague": "Aucune",
+    "cheveux": "Chauve",
+    "pilosite": "Glabre",
+    "silhouette": "Mince",
+    "signe": "Lorgnon"
+   },
+   "rumeur_charge": "venait d'apprendre qu'on le déshéritait",
+   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+  }
+ ],
+ "table": [
+  {
+   "n": 8,
+   "enq": 5,
+   "coup": 1,
+   "comp": 1,
+   "intr": 1,
+   "tours": "3",
+   "actes": 2,
+   "carte": "—"
+  },
+  {
+   "n": 10,
+   "enq": 6,
+   "coup": 1,
+   "comp": 1,
+   "intr": 2,
+   "tours": "3-4",
+   "actes": 2,
+   "carte": "Complaisance"
+  },
+  {
+   "n": 12,
+   "enq": 7,
+   "coup": 1,
+   "comp": 1,
+   "intr": 3,
+   "tours": "4",
+   "actes": 2,
+   "carte": "Complaisance"
+  },
+  {
+   "n": 14,
+   "enq": 8,
+   "coup": 1,
+   "comp": 2,
+   "intr": 3,
+   "tours": "4",
+   "actes": 2,
+   "carte": "—"
+  },
+  {
+   "n": 16,
+   "enq": 10,
+   "coup": 1,
+   "comp": 2,
+   "intr": 3,
+   "tours": "5",
+   "actes": 2,
+   "carte": "—"
+  },
+  {
+   "n": 18,
+   "enq": 11,
+   "coup": 1,
+   "comp": 3,
+   "intr": 3,
+   "tours": "5",
+   "actes": 2,
+   "carte": "Témoin à charge"
+  },
+  {
+   "n": 20,
+   "enq": 12,
+   "coup": 1,
+   "comp": 3,
+   "intr": 4,
+   "tours": "5",
+   "actes": 2,
+   "carte": "Témoin à charge"
+  }
+ ],
+ "scenarios": [
+  {
+   "id": "A",
+   "titre": "Une Mort avant l'Aube",
+   "joueurs": "8-12",
+   "victime": "Lord Ashcombe (empoisonné)",
+   "cercle": [
+    26,
+    6,
+    31
+   ],
+   "coupable": 26,
+   "traits": [
+    [
+     "main",
+     "Gaucher"
+    ],
+    [
+     "cheveux",
+     "Bruns"
+    ]
+   ],
+   "complices": [
+    2
+   ],
+   "intrigants": [
+    13,
+    24
+   ],
+   "enq": [
+    1,
+    3,
+    10,
+    12,
+    15,
+    4
+   ]
+  },
+  {
+   "id": "B",
+   "titre": "Le Fou de Ravenswood",
+   "joueurs": "13-17",
+   "victime": "Cousin Abernathy (étouffé)",
+   "cercle": [
+    17,
+    18,
+    19
+   ],
+   "coupable": 17,
+   "traits": [
+    [
+     "bague",
+     "Chevalière"
+    ],
+    [
+     "silhouette",
+     "Grand"
+    ]
+   ],
+   "complices": [
+    16,
+    3
+   ],
+   "intrigants": [
+    24,
+    13,
+    7
+   ],
+   "enq": [
+    1,
+    4,
+    9,
+    12,
+    15,
+    21,
+    22,
+    28,
+    32
+   ]
+  },
+  {
+   "id": "C",
+   "titre": "La Veille de Noël",
+   "joueurs": "18-20",
+   "victime": "Lord Ashcombe (escalier)",
+   "cercle": [
+    13,
+    14,
+    27
+   ],
+   "coupable": 27,
+   "traits": [
+    [
+     "main",
+     "Droitier"
+    ],
+    [
+     "silhouette",
+     "Corpulent"
+    ]
+   ],
+   "complices": [
+    16,
+    3,
+    12
+   ],
+   "intrigants": [
+    24,
+    7,
+    29,
+    34
+   ],
+   "enq": [
+    1,
+    4,
+    5,
+    9,
+    15,
+    18,
+    21,
+    22,
+    28,
+    32,
+    35
+   ]
+  }
+ ],
+ "neutral_dims": [
+  "main",
+  "bague",
+  "cheveux",
+  "silhouette",
+  "signe"
+ ],
+ "labels": {
+  "main": "Main",
+  "bague": "Bague",
+  "cheveux": "Cheveux",
+  "pilosite": "Pilosité",
+  "silhouette": "Silhouette",
+  "signe": "Signe"
+ }
+}
