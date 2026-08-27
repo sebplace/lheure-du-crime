@@ -220,6 +220,31 @@ img.avatar{object-fit:cover;object-position:center 30%}
   transition:.25s;z-index:200;max-width:88%;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 
+/* ---------- Dénouement ---------- */
+.deno .deno-body{max-width:720px;width:92%;max-height:100vh;overflow:auto;text-align:center;padding:24px 8px}
+.deno h2{font-family:'Cormorant Garamond',serif;font-style:italic;color:#c9a24a;font-size:clamp(18px,3.4vw,26px);margin:.2em 0 .1em}
+.deno .deno-step{border-top:1px solid rgba(201,162,74,.3);padding:14px 0;animation:denofade .5s ease}
+.deno .deno-step:first-child{border-top:0}
+.deno .deno-big{font-family:'Playfair Display',serif;font-weight:900;color:#e6c96a;font-size:clamp(26px,6vw,52px);line-height:1.1;margin:.1em 0}
+.deno .deno-tab{margin:6px auto;border-collapse:collapse;color:#ecdcc0;font-size:15px;min-width:min(560px,90%)}
+.deno .deno-tab th{color:#c9a24a;border-bottom:1px solid rgba(201,162,74,.4);padding:5px 10px;text-align:left}
+.deno .deno-tab td{padding:5px 10px;border-bottom:1px dotted rgba(201,162,74,.2)}
+@keyframes denofade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.obj-set{display:flex;gap:3px;margin-left:auto}
+.obj-set button{width:30px;height:30px;padding:0;border-radius:6px}
+
+/* ---------- Feuille de distribution ---------- */
+.sheet{position:fixed;inset:0;z-index:100;display:none;background:#fbf6ea;color:#241a10;overflow:auto;padding:18px}
+.sheet.on{display:block}
+.sheet-head{max-width:1000px;margin:0 auto 12px}
+.sheet-head h2{font-family:'Playfair Display',serif;color:#6e222b;margin:.2em 0}
+.sheet-head .no-print{display:flex;gap:8px;margin:8px 0}
+.sheet-grid{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.sheet-card{display:flex;gap:10px;align-items:center;border:1px solid #c9a24a;border-radius:8px;padding:8px;background:#fff;break-inside:avoid}
+.sheet-qr{width:84px;height:84px;flex:0 0 auto;background:#fff}
+.sheet-qr svg{width:100%;height:100%}
+.sheet-info b{color:#4a141a}
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width:640px){
   header.top{padding:16px 10px 8px}
@@ -237,10 +262,23 @@ img.avatar{object-fit:cover;object-position:center 30%}
 
 /* ---------- PRINT ---------- */
 @media print{
-  header,nav,footer,.hdr-tools,.seedbar,.timer-ctl,.phase-btns{display:none!important}
+  header,nav,footer,.hdr-tools,.seedbar,.timer-ctl,.phase-btns,.no-print{display:none!important}
   body::after,body::before{display:none}
   section.panel{display:none!important}
   #partie.panel{display:block!important}
   .brief{border:1px solid #999;box-shadow:none}
   body{background:#fff;color:#000}
+  /* Feuille de distribution : occupe la page si ouverte */
+  .sheet.on{position:static;display:block;background:#fff;color:#000;padding:0}
+  .sheet-qr,.sheet-qr svg{width:80px;height:80px}
+  /* Dénouement : imprime en clair si ouvert */
+  #denouement.on{position:static;display:block;background:#fff;color:#000;padding:0}
+  #denouement.on .deno-body{max-width:100%;color:#000}
+  #denouement.on h2{color:#6e222b}
+  #denouement.on .deno-big{color:#4a141a}
+  #denouement.on .deno-tab{color:#000}
+  #denouement.on .deno-tab th{color:#6e222b}
+  .proj-close{display:none!important}
+  /* si un overlay est ouvert, il prime sur le brief */
+  body:has(.sheet.on) #partie.panel,body:has(#denouement.on) #partie.panel{display:none!important}
 }
