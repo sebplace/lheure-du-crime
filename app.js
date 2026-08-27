@@ -263,7 +263,7 @@ function hiddenIntel(g, p, full){
   const L = [];
   if (p.role === 'coupable' && g.complices.length) L.push('🕵️ Vos complices : ' + g.complices.map(nm).join(', '));
   if (p.role === 'complice') L.push('🤝 Le Coupable est : ' + nm(g.coupable));
-  if (p.atout === 'Le Vengeur' && p.cible) L.push('🎯 Cible à faire accuser (un leurre) : ' + nm(p.cible));
+  if (p.atout === 'Le Vengeur' && p.cible) L.push('🎯 Cible (leurre) — à faire accuser OU tuer au 2ᵉ meurtre : ' + nm(p.cible));
   if (p.atout === 'Le Notaire' && p.cible) L.push('📜 Vous connaissez le Secret de : ' + nm(p.cible));
   return L;
 }

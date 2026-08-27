@@ -1086,7 +1086,7 @@
    "camp": "intr",
    "kind": "objectif",
    "timing": "Objectif",
-   "effet": "Vous gagnez si le leurre du Cercle désigné par le MJ (au dos de cette carte) est formellement accusé au cours de la partie.",
+   "effet": "Vendetta. Le MJ vous remet le nom de votre cible (un leurre du Cercle). Vous gagnez si votre cible est formellement accusée OU victime du second meurtre.",
    "img": "img/atout_le_vengeur.webp"
   },
   {
