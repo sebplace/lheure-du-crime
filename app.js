@@ -248,16 +248,24 @@ function assignerRoles(g, rng){
     else p.secret = 'Un Secret quelconque du vivier.';
     p.distribue = false;
   });
-  // cible du Vengeur : un innocent à faire accuser (Enquêteur de préférence, jamais le Coupable ni le Vengeur)
+  // cible du Vengeur : un LEURRE (innocent DU Cercle) — seule cible réellement accusable via l'entonnoir public
   const veng = players.find(p => p.atout === 'Le Vengeur');
-  if (veng){
-    const enqPool = players.filter(p => p.role === 'enqueteur' && p.num !== veng.num);
-    const anyPool = players.filter(p => p.num !== veng.num && p.num !== g.coupable);
-    const pool = enqPool.length ? enqPool : anyPool;
-    if (pool.length) veng.cible = pool[Math.floor(rng() * pool.length)].num;
-  }
+  if (veng && g.leurres.length) veng.cible = g.leurres[Math.floor(rng() * g.leurres.length)];
+  // Notaire : connaît dès le départ le Secret d'un autre joueur (désigné par le MJ)
+  const notaire = players.find(p => p.atout === 'Le Notaire');
+  if (notaire){ const pool = players.filter(p => p.num !== notaire.num); if (pool.length) notaire.cible = pool[Math.floor(rng() * pool.length)].num; }
   players.sort((a, b) => g.present.indexOf(a.num) - g.present.indexOf(b.num));
   g.players = players;
+}
+/* Infos confidentielles propres à un rôle, à porter sur sa fiche (comme le MJ le ferait de vive voix). */
+function hiddenIntel(g, p, full){
+  const nm = num => full ? esc(BYNUM[num].nom) : esc(nomCourt(num));
+  const L = [];
+  if (p.role === 'coupable' && g.complices.length) L.push('🕵️ Vos complices : ' + g.complices.map(nm).join(', '));
+  if (p.role === 'complice') L.push('🤝 Le Coupable est : ' + nm(g.coupable));
+  if (p.atout === 'Le Vengeur' && p.cible) L.push('🎯 Cible à faire accuser (un leurre) : ' + nm(p.cible));
+  if (p.atout === 'Le Notaire' && p.cible) L.push('📜 Vous connaissez le Secret de : ' + nm(p.cible));
+  return L;
 }
 
 function batirIndices(g){
@@ -339,7 +347,7 @@ function copyBrief(g){
   L.push(`Complices : ${g.complices.map(nomCourt).join(', ') || '—'}`);
   L.push(`Intrigants : ${g.intrigants.map(nomCourt).join(', ') || '—'}`);
   L.push('Rôles/Atouts :');
-  g.players.forEach(p => L.push(`  ${nomCourt(p.num)} · ${p.camp} · ${p.atout}${p.atout === 'Le Vengeur' && p.cible ? ' (cible : ' + nomCourt(p.cible) + ')' : ''} · ${p.secret}`));
+  g.players.forEach(p => { const intel = hiddenIntel(g, p).map(x => x.replace(/<[^>]+>/g, '')); L.push(`  ${nomCourt(p.num)} · ${p.camp} · ${p.atout} · ${p.secret}${intel.length ? '  [' + intel.join(' ; ') + ']' : ''}`); });
   navigator.clipboard.writeText(L.join('\n')).then(() => toast('Brief copié dans le presse-papiers.'));
 }
 
@@ -532,13 +540,14 @@ function renderRoles(){
   const rows = $('#roleRows');
   g.players.forEach((p, i) => {
     const at = DATA.atouts.find(a => a.nom === p.atout);
+    const intel = hiddenIntel(g, p);
     const r = el('div', 'card'); r.style.padding = '10px 12px'; r.style.margin = '7px 0';
     r.innerHTML = `<div class="prow" style="border:0;padding:0">
         ${avatarHtml(p.num, p.role === 'coupable' ? 'coup' : '')}
         <div class="who"><b>${esc(BYNUM[p.num].nom)}</b> <span class="tag ${p.camp === 'enq' ? 'enq' : p.camp === 'intr' ? 'intr' : p.role === 'coupable' ? 'coup' : 'malf'}">${p.role === 'coupable' ? 'Coupable' : p.role === 'complice' ? 'Complice' : p.role === 'intrigant' ? 'Intrigant' : 'Enquêteur'}</span>
           <div class="r">Atout : <b>${esc(p.atout)}</b>${at ? ' · <span class="muted">' + esc(at.timing) + '</span>' : ''}</div></div>
         <label class="dist-chk"><input type="checkbox" data-i="${i}" ${p.distribue ? 'checked' : ''}> remis</label></div>
-      <div class="atout-line">${atoutImg(p.atout)}<div class="muted" style="font-size:13px">${at ? '⚙️ ' + esc(at.effet) + '<br>' : ''}${p.atout === 'Le Vengeur' && p.cible ? '🎯 <b>Cible à faire accuser : ' + esc(nomCourt(p.cible)) + '</b><br>' : ''}🗝️ ${esc(p.secret)}</div></div>
+      <div class="atout-line">${atoutImg(p.atout)}<div class="muted" style="font-size:13px">${at ? '⚙️ ' + esc(at.effet) + '<br>' : ''}${intel.map(x => '<b>' + x + '</b>').join('<br>')}${intel.length ? '<br>' : ''}🗝️ ${esc(p.secret)}</div></div>
       <div class="rowflex" style="margin-top:6px"><button class="ghost" data-link="${i}">🔗 Lien joueur</button></div>`;
     r.querySelector('input').onchange = e => { p.distribue = e.target.checked; persistCur(); renderRoles(); };
     r.querySelector('[data-link]').onclick = () => showPlayerCard(g, i);
@@ -568,7 +577,7 @@ function showPlayerCard(g, idx){
       <div style="border-top:1px solid rgba(201,162,74,.35);margin:14px 0;padding-top:12px">
         <div class="pc-atout">${atoutImg(p.atout)}<div><p style="color:#e6c96a;font-weight:700;margin:.2em 0">Votre Atout : ${esc(p.atout)}</p>
         ${at ? `<p style="color:#ecdcc0;font-size:15px;margin:.2em 0">${esc(at.effet)}<br><span style="color:#c9a24a">Moment : ${esc(at.timing)}</span></p>` : ''}
-        ${p.atout === 'Le Vengeur' && p.cible ? `<p style="color:#e6c96a;font-size:15px;margin:.3em 0">🎯 Votre cible à faire accuser : <b>${esc(BYNUM[p.cible].nom)}</b></p>` : ''}</div></div>
+        ${hiddenIntel(g, p, true).map(x => `<p style="color:#e6c96a;font-size:15px;margin:.3em 0">${x}</p>`).join('')}</div></div>
       </div>
       <div class="pc-qr" id="pcQR" title="Ouvrir cette fiche sur un téléphone"></div>
       <p style="color:#9a8f80;font-size:13px">Scannez pour ouvrir cette fiche sur votre téléphone, puis rendez l'écran au Meneur.</p>
