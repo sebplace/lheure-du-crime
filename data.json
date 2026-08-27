@@ -693,6 +693,16 @@
    "carte": "—"
   },
   {
+   "n": 9,
+   "enq": 6,
+   "coup": 1,
+   "comp": 1,
+   "intr": 1,
+   "tours": "3-4",
+   "actes": 2,
+   "carte": "—"
+  },
+  {
    "n": 10,
    "enq": 6,
    "coup": 1,
@@ -703,8 +713,28 @@
    "carte": "Complaisance"
   },
   {
+   "n": 11,
+   "enq": 7,
+   "coup": 1,
+   "comp": 1,
+   "intr": 2,
+   "tours": "4",
+   "actes": 2,
+   "carte": "Complaisance"
+  },
+  {
    "n": 12,
    "enq": 7,
+   "coup": 1,
+   "comp": 1,
+   "intr": 3,
+   "tours": "4",
+   "actes": 2,
+   "carte": "Complaisance"
+  },
+  {
+   "n": 13,
+   "enq": 8,
    "coup": 1,
    "comp": 1,
    "intr": 3,
@@ -723,6 +753,16 @@
    "carte": "—"
   },
   {
+   "n": 15,
+   "enq": 9,
+   "coup": 1,
+   "comp": 2,
+   "intr": 3,
+   "tours": "4-5",
+   "actes": 2,
+   "carte": "—"
+  },
+  {
    "n": 16,
    "enq": 10,
    "coup": 1,
@@ -733,8 +773,28 @@
    "carte": "—"
   },
   {
+   "n": 17,
+   "enq": 11,
+   "coup": 1,
+   "comp": 2,
+   "intr": 3,
+   "tours": "5",
+   "actes": 2,
+   "carte": "—"
+  },
+  {
    "n": 18,
    "enq": 11,
+   "coup": 1,
+   "comp": 3,
+   "intr": 3,
+   "tours": "5",
+   "actes": 2,
+   "carte": "Témoin à charge"
+  },
+  {
+   "n": 19,
+   "enq": 12,
    "coup": 1,
    "comp": 3,
    "intr": 3,
