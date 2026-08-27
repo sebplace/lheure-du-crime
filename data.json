@@ -14,7 +14,8 @@
     "signe": "Canne"
    },
    "rumeur_charge": "rôdait près de la serre à l'heure du crime",
-   "rumeur_decharge": "ignorait jusqu'à l'existence du coffre"
+   "rumeur_decharge": "ignorait jusqu'à l'existence du coffre",
+   "portrait": "img/portrait_01.webp"
   },
   {
    "num": 2,
@@ -30,7 +31,8 @@
     "signe": "Grain de beauté"
    },
    "rumeur_charge": "a gravi l'escalier de service en catimini",
-   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+   "rumeur_decharge": "serait bien incapable de doser un tel poison",
+   "portrait": "img/portrait_02.webp"
   },
   {
    "num": 3,
@@ -46,7 +48,8 @@
     "signe": "Aucun"
    },
    "rumeur_charge": "a quitté le salon juste avant le cri",
-   "rumeur_decharge": "ne possédait aucune clé de l'étage"
+   "rumeur_decharge": "ne possédait aucune clé de l'étage",
+   "portrait": "img/portrait_03.webp"
   },
   {
    "num": 4,
@@ -62,7 +65,8 @@
     "signe": "Canne"
    },
    "rumeur_charge": "fut aperçu au seuil de la chambre de la victime",
-   "rumeur_decharge": "venait de se réconcilier publiquement avec elle"
+   "rumeur_decharge": "venait de se réconcilier publiquement avec elle",
+   "portrait": "img/portrait_04.webp"
   },
   {
    "num": 5,
@@ -78,7 +82,8 @@
     "signe": "Lorgnon"
    },
    "rumeur_charge": "détenait un double de la clé",
-   "rumeur_decharge": "soupait en tête-à-tête avec le pasteur"
+   "rumeur_decharge": "soupait en tête-à-tête avec le pasteur",
+   "portrait": "img/portrait_05.webp"
   },
   {
    "num": 6,
@@ -94,7 +99,8 @@
     "signe": "Lorgnon"
    },
    "rumeur_charge": "connaissait la cachette du flacon de poison",
-   "rumeur_decharge": "devait à la victime toute sa fortune"
+   "rumeur_decharge": "devait à la victime toute sa fortune",
+   "portrait": "img/portrait_06.webp"
   },
   {
    "num": 7,
@@ -110,7 +116,8 @@
     "signe": "Grain de beauté"
    },
    "rumeur_charge": "avait ses entrées dans le cabinet de la victime",
-   "rumeur_decharge": "se tenait dehors, sous la neige, à la vue de tous"
+   "rumeur_decharge": "se tenait dehors, sous la neige, à la vue de tous",
+   "portrait": "img/portrait_07.webp"
   },
   {
    "num": 8,
@@ -126,7 +133,8 @@
     "signe": "Lorgnon"
    },
    "rumeur_charge": "savait où l'arme était rangée",
-   "rumeur_decharge": "héritait de toute façon, sans lever le petit doigt"
+   "rumeur_decharge": "héritait de toute façon, sans lever le petit doigt",
+   "portrait": "img/portrait_08.webp"
   },
   {
    "num": 9,
@@ -142,7 +150,8 @@
     "signe": "Grain de beauté"
    },
    "rumeur_charge": "croulait sous les dettes envers la victime",
-   "rumeur_decharge": "n'a pas quitté la bibliothèque de la nuit"
+   "rumeur_decharge": "n'a pas quitté la bibliothèque de la nuit",
+   "portrait": "img/portrait_09.webp"
   },
   {
    "num": 10,
@@ -158,7 +167,8 @@
     "signe": "Grain de beauté"
    },
    "rumeur_charge": "venait d'apprendre qu'on le déshéritait",
-   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+   "rumeur_decharge": "serait bien incapable de doser un tel poison",
+   "portrait": "img/portrait_10.webp"
   },
   {
    "num": 11,
@@ -174,7 +184,8 @@
     "signe": "Lorgnon"
    },
    "rumeur_charge": "avait juré, devant témoins, de se venger",
-   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+   "rumeur_decharge": "jouait au whist au salon toute la soirée",
+   "portrait": "img/portrait_11.webp"
   },
   {
    "num": 12,
@@ -190,7 +201,8 @@
     "signe": "Canne"
    },
    "rumeur_charge": "fut jadis l'amant éconduit de la victime",
-   "rumeur_decharge": "n'a jamais su où l'on rangeait l'arme"
+   "rumeur_decharge": "n'a jamais su où l'on rangeait l'arme",
+   "portrait": "img/portrait_12.webp"
   },
   {
    "num": 13,
@@ -206,7 +218,8 @@
     "signe": "Lorgnon"
    },
    "rumeur_charge": "possède de solides notions de médecine et de poisons",
-   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+   "rumeur_decharge": "jouait au whist au salon toute la soirée",
+   "portrait": "img/portrait_13.webp"
   },
   {
    "num": 14,
@@ -222,7 +235,8 @@
     "signe": "Cicatrice"
    },
    "rumeur_charge": "sait crocheter une serrure sans laisser de trace",
-   "rumeur_decharge": "trouva le cabinet fermé et n'y put entrer"
+   "rumeur_decharge": "trouva le cabinet fermé et n'y put entrer",
+   "portrait": "img/portrait_14.webp"
   },
   {
    "num": 15,
@@ -238,7 +252,8 @@
     "signe": "Canne"
    },
    "rumeur_charge": "manie l'épée avec une redoutable adresse",
-   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+   "rumeur_decharge": "jouait au whist au salon toute la soirée",
+   "portrait": "img/portrait_15.webp"
   },
   {
    "num": 16,
@@ -254,7 +269,8 @@
     "signe": "Lorgnon"
    },
    "rumeur_charge": "rôdait près de la serre à l'heure du crime",
-   "rumeur_decharge": "ignorait jusqu'à l'existence du coffre"
+   "rumeur_decharge": "ignorait jusqu'à l'existence du coffre",
+   "portrait": "img/portrait_16.webp"
   },
   {
    "num": 17,
@@ -270,7 +286,8 @@
     "signe": "Canne"
    },
    "rumeur_charge": "a gravi l'escalier de service en catimini",
-   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+   "rumeur_decharge": "serait bien incapable de doser un tel poison",
+   "portrait": "img/portrait_17.webp"
   },
   {
    "num": 18,
@@ -286,7 +303,8 @@
     "signe": "Cicatrice"
    },
    "rumeur_charge": "a quitté le salon juste avant le cri",
-   "rumeur_decharge": "ne possédait aucune clé de l'étage"
+   "rumeur_decharge": "ne possédait aucune clé de l'étage",
+   "portrait": "img/portrait_18.webp"
   },
   {
    "num": 19,
@@ -302,7 +320,8 @@
     "signe": "Canne"
    },
    "rumeur_charge": "fut aperçu au seuil de la chambre de la victime",
-   "rumeur_decharge": "venait de se réconcilier publiquement avec elle"
+   "rumeur_decharge": "venait de se réconcilier publiquement avec elle",
+   "portrait": "img/portrait_19.webp"
   },
   {
    "num": 20,
@@ -318,7 +337,8 @@
     "signe": "Aucun"
    },
    "rumeur_charge": "détenait un double de la clé",
-   "rumeur_decharge": "soupait en tête-à-tête avec le pasteur"
+   "rumeur_decharge": "soupait en tête-à-tête avec le pasteur",
+   "portrait": "img/portrait_20.webp"
   },
   {
    "num": 21,
@@ -334,7 +354,8 @@
     "signe": "Lorgnon"
    },
    "rumeur_charge": "connaissait la cachette du flacon de poison",
-   "rumeur_decharge": "devait à la victime toute sa fortune"
+   "rumeur_decharge": "devait à la victime toute sa fortune",
+   "portrait": "img/portrait_21.webp"
   },
   {
    "num": 22,
@@ -350,7 +371,8 @@
     "signe": "Aucun"
    },
    "rumeur_charge": "avait ses entrées dans le cabinet de la victime",
-   "rumeur_decharge": "se tenait dehors, sous la neige, à la vue de tous"
+   "rumeur_decharge": "se tenait dehors, sous la neige, à la vue de tous",
+   "portrait": "img/portrait_22.webp"
   },
   {
    "num": 23,
@@ -366,7 +388,8 @@
     "signe": "Cicatrice"
    },
    "rumeur_charge": "savait où l'arme était rangée",
-   "rumeur_decharge": "héritait de toute façon, sans lever le petit doigt"
+   "rumeur_decharge": "héritait de toute façon, sans lever le petit doigt",
+   "portrait": "img/portrait_23.webp"
   },
   {
    "num": 24,
@@ -382,7 +405,8 @@
     "signe": "Canne"
    },
    "rumeur_charge": "croulait sous les dettes envers la victime",
-   "rumeur_decharge": "n'a pas quitté la bibliothèque de la nuit"
+   "rumeur_decharge": "n'a pas quitté la bibliothèque de la nuit",
+   "portrait": "img/portrait_24.webp"
   },
   {
    "num": 25,
@@ -398,7 +422,8 @@
     "signe": "Cicatrice"
    },
    "rumeur_charge": "venait d'apprendre qu'on le déshéritait",
-   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+   "rumeur_decharge": "serait bien incapable de doser un tel poison",
+   "portrait": "img/portrait_25.webp"
   },
   {
    "num": 26,
@@ -414,7 +439,8 @@
     "signe": "Grain de beauté"
    },
    "rumeur_charge": "avait juré, devant témoins, de se venger",
-   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+   "rumeur_decharge": "jouait au whist au salon toute la soirée",
+   "portrait": "img/portrait_26.webp"
   },
   {
    "num": 27,
@@ -430,7 +456,8 @@
     "signe": "Canne"
    },
    "rumeur_charge": "fut jadis l'amant éconduit de la victime",
-   "rumeur_decharge": "n'a jamais su où l'on rangeait l'arme"
+   "rumeur_decharge": "n'a jamais su où l'on rangeait l'arme",
+   "portrait": "img/portrait_27.webp"
   },
   {
    "num": 28,
@@ -446,7 +473,8 @@
     "signe": "Cicatrice"
    },
    "rumeur_charge": "possède de solides notions de médecine et de poisons",
-   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+   "rumeur_decharge": "jouait au whist au salon toute la soirée",
+   "portrait": "img/portrait_28.webp"
   },
   {
    "num": 29,
@@ -462,7 +490,8 @@
     "signe": "Lorgnon"
    },
    "rumeur_charge": "sait crocheter une serrure sans laisser de trace",
-   "rumeur_decharge": "trouva le cabinet fermé et n'y put entrer"
+   "rumeur_decharge": "trouva le cabinet fermé et n'y put entrer",
+   "portrait": "img/portrait_29.webp"
   },
   {
    "num": 30,
@@ -478,7 +507,8 @@
     "signe": "Aucun"
    },
    "rumeur_charge": "manie l'épée avec une redoutable adresse",
-   "rumeur_decharge": "jouait au whist au salon toute la soirée"
+   "rumeur_decharge": "jouait au whist au salon toute la soirée",
+   "portrait": "img/portrait_30.webp"
   },
   {
    "num": 31,
@@ -494,7 +524,8 @@
     "signe": "Cicatrice"
    },
    "rumeur_charge": "rôdait près de la serre à l'heure du crime",
-   "rumeur_decharge": "ignorait jusqu'à l'existence du coffre"
+   "rumeur_decharge": "ignorait jusqu'à l'existence du coffre",
+   "portrait": "img/portrait_31.webp"
   },
   {
    "num": 32,
@@ -510,7 +541,8 @@
     "signe": "Aucun"
    },
    "rumeur_charge": "a gravi l'escalier de service en catimini",
-   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+   "rumeur_decharge": "serait bien incapable de doser un tel poison",
+   "portrait": "img/portrait_32.webp"
   },
   {
    "num": 33,
@@ -526,7 +558,8 @@
     "signe": "Canne"
    },
    "rumeur_charge": "a quitté le salon juste avant le cri",
-   "rumeur_decharge": "ne possédait aucune clé de l'étage"
+   "rumeur_decharge": "ne possédait aucune clé de l'étage",
+   "portrait": "img/portrait_65.webp"
   },
   {
    "num": 34,
@@ -542,7 +575,8 @@
     "signe": "Canne"
    },
    "rumeur_charge": "fut aperçu au seuil de la chambre de la victime",
-   "rumeur_decharge": "venait de se réconcilier publiquement avec elle"
+   "rumeur_decharge": "venait de se réconcilier publiquement avec elle",
+   "portrait": "img/portrait_66.webp"
   },
   {
    "num": 35,
@@ -558,7 +592,8 @@
     "signe": "Cicatrice"
    },
    "rumeur_charge": "détenait un double de la clé",
-   "rumeur_decharge": "soupait en tête-à-tête avec le pasteur"
+   "rumeur_decharge": "soupait en tête-à-tête avec le pasteur",
+   "portrait": "img/portrait_67.webp"
   },
   {
    "num": 36,
@@ -574,7 +609,8 @@
     "signe": "Cicatrice"
    },
    "rumeur_charge": "connaissait la cachette du flacon de poison",
-   "rumeur_decharge": "devait à la victime toute sa fortune"
+   "rumeur_decharge": "devait à la victime toute sa fortune",
+   "portrait": "img/portrait_68.webp"
   },
   {
    "num": 37,
@@ -590,7 +626,8 @@
     "signe": "Lorgnon"
    },
    "rumeur_charge": "avait ses entrées dans le cabinet de la victime",
-   "rumeur_decharge": "se tenait dehors, sous la neige, à la vue de tous"
+   "rumeur_decharge": "se tenait dehors, sous la neige, à la vue de tous",
+   "portrait": "img/portrait_69.webp"
   },
   {
    "num": 38,
@@ -606,7 +643,8 @@
     "signe": "Grain de beauté"
    },
    "rumeur_charge": "savait où l'arme était rangée",
-   "rumeur_decharge": "héritait de toute façon, sans lever le petit doigt"
+   "rumeur_decharge": "héritait de toute façon, sans lever le petit doigt",
+   "portrait": "img/portrait_70.webp"
   },
   {
    "num": 39,
@@ -622,7 +660,8 @@
     "signe": "Cicatrice"
    },
    "rumeur_charge": "croulait sous les dettes envers la victime",
-   "rumeur_decharge": "n'a pas quitté la bibliothèque de la nuit"
+   "rumeur_decharge": "n'a pas quitté la bibliothèque de la nuit",
+   "portrait": "img/portrait_71.webp"
   },
   {
    "num": 40,
@@ -638,7 +677,8 @@
     "signe": "Lorgnon"
    },
    "rumeur_charge": "venait d'apprendre qu'on le déshéritait",
-   "rumeur_decharge": "serait bien incapable de doser un tel poison"
+   "rumeur_decharge": "serait bien incapable de doser un tel poison",
+   "portrait": "img/portrait_72.webp"
   }
  ],
  "table": [
@@ -846,196 +886,224 @@
    "camp": "enq",
    "kind": "atout",
    "timing": "Investigation",
-   "effet": "Désignez un joueur ; le MJ vous dit s'il est impliqué ou non dans le meurtre."
+   "effet": "Désignez un joueur ; le MJ vous dit s'il est impliqué ou non dans le meurtre.",
+   "img": "img/atout_le_medium.webp"
   },
   {
    "nom": "Le Légiste",
    "camp": "enq",
    "kind": "atout",
    "timing": "Investigation (1×)",
-   "effet": "Apprenez si un Indice précis vise l'un des suspects du Cercle, ou s'il est une fausse piste."
+   "effet": "Apprenez si un Indice précis vise l'un des suspects du Cercle, ou s'il est une fausse piste.",
+   "img": "img/atout_le_legiste.webp"
   },
   {
    "nom": "Le Détective",
    "camp": "enq",
    "kind": "atout",
    "timing": "Investigation",
-   "effet": "Désignez deux joueurs ; apprenez si au moins un est un Malfaiteur."
+   "effet": "Désignez deux joueurs ; apprenez si au moins un est un Malfaiteur.",
+   "img": "img/atout_le_detective.webp"
   },
   {
    "nom": "Le Confesseur",
    "camp": "enq",
    "kind": "atout",
    "timing": "Investigation",
-   "effet": "Protégez un joueur d'un meurtre pour ce tour."
+   "effet": "Protégez un joueur d'un meurtre pour ce tour.",
+   "img": "img/atout_le_confesseur.webp"
   },
   {
    "nom": "Le Notaire",
    "camp": "enq",
    "kind": "atout",
    "timing": "Passif",
-   "effet": "Vous connaissez dès le départ le secret d'un autre joueur."
+   "effet": "Vous connaissez dès le départ le secret d'un autre joueur.",
+   "img": "img/atout_le_notaire.webp"
   },
   {
    "nom": "Le Psychologue",
    "camp": "enq",
    "kind": "atout",
    "timing": "Investigation (1×)",
-   "effet": "Apprenez le camp d'un joueur."
+   "effet": "Apprenez le camp d'un joueur.",
+   "img": "img/atout_le_psychologue.webp"
   },
   {
    "nom": "Le Commissaire",
    "camp": "enq",
    "kind": "atout",
    "timing": "Investigation (1×)",
-   "effet": "Apprenez combien de Malfaiteurs sont en jeu."
+   "effet": "Apprenez combien de Malfaiteurs sont en jeu.",
+   "img": "img/atout_le_commissaire.webp"
   },
   {
    "nom": "Le Journaliste",
    "camp": "enq",
    "kind": "atout",
    "timing": "Audience",
-   "effet": "Forcez un joueur à révéler honnêtement l'un de ses Secrets, en public."
+   "effet": "Forcez un joueur à révéler honnêtement l'un de ses Secrets, en public.",
+   "img": "img/atout_le_journaliste.webp"
   },
   {
    "nom": "Le Fouineur",
    "camp": "enq",
    "kind": "atout",
    "timing": "Investigation (1×)",
-   "effet": "Fouillez un joueur : il révèle franchement un de ses attributs privés, à votre choix."
+   "effet": "Fouillez un joueur : il révèle franchement un de ses attributs privés, à votre choix.",
+   "img": "img/atout_le_fouineur.webp"
   },
   {
    "nom": "Le Majordome",
    "camp": "enq",
    "kind": "atout",
    "timing": "Passif",
-   "effet": "Recevez chaque tour un Indice de plus, en secret."
+   "effet": "Recevez chaque tour un Indice de plus, en secret.",
+   "img": "img/atout_le_majordome.webp"
   },
   {
    "nom": "L'Archiviste",
    "camp": "enq",
    "kind": "atout",
    "timing": "Investigation (1×)",
-   "effet": "Reconsultez un Indice retiré ou déplacé, et repérez la trace d'un trucage."
+   "effet": "Reconsultez un Indice retiré ou déplacé, et repérez la trace d'un trucage.",
+   "img": "img/atout_l_archiviste.webp"
   },
   {
    "nom": "L'Avocat",
    "camp": "enq",
    "kind": "atout",
    "timing": "Délibéré (1×)",
-   "effet": "Annulez un Acte d'accusation avant le vote."
+   "effet": "Annulez un Acte d'accusation avant le vote.",
+   "img": "img/atout_l_avocat.webp"
   },
   {
    "nom": "L'Enquêteur de terrain",
    "camp": "enq",
    "kind": "atout",
    "timing": "Investigation (1×)",
-   "effet": "Faites sortir un Indice plus tôt et rendez-le inannulable ce tour."
+   "effet": "Faites sortir un Indice plus tôt et rendez-le inannulable ce tour.",
+   "img": "img/atout_l_enqueteur_de_terrain.webp"
   },
   {
    "nom": "Le Coupable",
    "camp": "malf",
    "kind": "atout",
    "timing": "Investigation",
-   "effet": "Vous avez commis le meurtre. Vous pouvez frapper une seconde fois. Vous connaissez vos complices."
+   "effet": "Vous avez commis le meurtre. Vous pouvez frapper une seconde fois. Vous connaissez vos complices.",
+   "img": "img/atout_le_coupable.webp"
   },
   {
    "nom": "Le Corrupteur",
    "camp": "malf",
    "kind": "atout",
    "timing": "Investigation",
-   "effet": "Égarez un joueur : toutes ses informations de ce tour sont fausses."
+   "effet": "Égarez un joueur : toutes ses informations de ce tour sont fausses.",
+   "img": "img/atout_le_corrupteur.webp"
   },
   {
    "nom": "L'Usurpateur",
    "camp": "malf",
    "kind": "atout",
    "timing": "Passif",
-   "effet": "Vous apparaissez innocent aux Atouts d'information."
+   "effet": "Vous apparaissez innocent aux Atouts d'information.",
+   "img": "img/atout_l_usurpateur.webp"
   },
   {
    "nom": "L'Étouffeur",
    "camp": "malf",
    "kind": "atout",
    "timing": "Investigation (1×)",
-   "effet": "Annulez un Indice avant sa révélation (cela laisse une trace au mur)."
+   "effet": "Annulez un Indice avant sa révélation (cela laisse une trace au mur).",
+   "img": "img/atout_l_etouffeur.webp"
   },
   {
    "nom": "Le Maquilleur",
    "camp": "malf",
    "kind": "atout",
    "timing": "Investigation (1×)",
-   "effet": "Faites remplacer par le MJ un trait public d'un personnage sur la Liste des invités, avant la prochaine révélation (cela laisse une trace)."
+   "effet": "Faites remplacer par le MJ un trait public d'un personnage sur la Liste des invités, avant la prochaine révélation (cela laisse une trace).",
+   "img": "img/atout_le_maquilleur.webp"
   },
   {
    "nom": "Le Faussaire",
    "camp": "malf",
    "kind": "atout",
    "timing": "Investigation (1×)",
-   "effet": "Injectez une fausse piste de votre choix dans le dossier du MJ."
+   "effet": "Injectez une fausse piste de votre choix dans le dossier du MJ.",
+   "img": "img/atout_le_faussaire.webp"
   },
   {
    "nom": "Le Complice",
    "camp": "malf",
    "kind": "atout",
    "timing": "Passif",
-   "effet": "Vous connaissez le Coupable, vous votez toujours pour l'acquitter et pouvez lui fournir un alibi."
+   "effet": "Vous connaissez le Coupable, vous votez toujours pour l'acquitter et pouvez lui fournir un alibi.",
+   "img": "img/atout_le_complice.webp"
   },
   {
    "nom": "Le Bouc émissaire",
    "camp": "malf",
    "kind": "atout",
    "timing": "Investigation (1×)",
-   "effet": "Désignez en secret un innocent hors du Cercle : au tour suivant, le MJ fabrique une charge contre lui pour détourner les soupçons du Coupable."
+   "effet": "Désignez en secret un innocent hors du Cercle : au tour suivant, le MJ fabrique une charge contre lui pour détourner les soupçons du Coupable.",
+   "img": "img/atout_le_bouc_emissaire.webp"
   },
   {
    "nom": "L'Ombre",
    "camp": "malf",
    "kind": "atout",
    "timing": "Investigation (1×)",
-   "effet": "Étouffez une piste : un Atout d'information de votre choix renvoie « Rien à signaler » à son porteur ce tour."
+   "effet": "Étouffez une piste : un Atout d'information de votre choix renvoie « Rien à signaler » à son porteur ce tour.",
+   "img": "img/atout_l_ombre.webp"
   },
   {
    "nom": "Le Maître-chanteur",
    "camp": "intr",
    "kind": "objectif",
    "timing": "Objectif",
-   "effet": "Vous gagnez si vous énoncez à voix haute, avant la fin, le secret exact d'au moins DEUX autres joueurs."
+   "effet": "Vous gagnez si vous énoncez à voix haute, avant la fin, le secret exact d'au moins DEUX autres joueurs.",
+   "img": "img/atout_le_maitre_chanteur.webp"
   },
   {
    "nom": "L'Éminence grise",
    "camp": "intr",
    "kind": "objectif",
    "timing": "Objectif",
-   "effet": "Vous gagnez si c'est VOUS qui menez publiquement l'Acte d'accusation démasquant le Coupable."
+   "effet": "Vous gagnez si c'est VOUS qui menez publiquement l'Acte d'accusation démasquant le Coupable.",
+   "img": "img/atout_l_eminence_grise.webp"
   },
   {
    "nom": "Le Caméléon",
    "camp": "intr",
    "kind": "objectif",
    "timing": "Objectif",
-   "effet": "Vous gagnez si vous finissez SANS avoir été formellement accusé, et sans que votre secret soit révélé."
+   "effet": "Vous gagnez si vous finissez SANS avoir été formellement accusé, et sans que votre secret soit révélé.",
+   "img": "img/atout_le_cameleon.webp"
   },
   {
    "nom": "Le Vengeur",
    "camp": "intr",
    "kind": "objectif",
    "timing": "Objectif",
-   "effet": "Vous gagnez si le personnage désigné au dos de cette carte est formellement accusé au cours de la partie."
+   "effet": "Vous gagnez si le personnage désigné au dos de cette carte est formellement accusé au cours de la partie.",
+   "img": "img/atout_le_vengeur.webp"
   },
   {
    "nom": "Le Mondain",
    "camp": "intr",
    "kind": "objectif",
    "timing": "Objectif",
-   "effet": "Vous gagnez si au moins DEUX joueurs déclarent publiquement vous faire confiance au dernier tour."
+   "effet": "Vous gagnez si au moins DEUX joueurs déclarent publiquement vous faire confiance au dernier tour.",
+   "img": "img/atout_le_mondain.webp"
   },
   {
    "nom": "Le Dépositaire",
    "camp": "intr",
    "kind": "objectif",
    "timing": "Objectif",
-   "effet": "Vous gagnez si DEUX joueurs vous confient, de leur plein gré, leur secret avant la fin (le MJ valide chaque confidence)."
+   "effet": "Vous gagnez si DEUX joueurs vous confient, de leur plein gré, leur secret avant la fin (le MJ valide chaque confidence).",
+   "img": "img/atout_le_depositaire.webp"
   }
  ],
  "neutral_dims": [

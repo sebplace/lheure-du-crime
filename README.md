@@ -36,3 +36,19 @@ backend. Déployable tel quel sur GitHub Pages.
 ## Licence
 
 © Sébastien Place. Tous droits réservés.
+
+## Nouveautés v3
+
+- Application installable (PWA) et **hors-ligne** (service worker).
+- **Générateur de partie** avec difficulté, pitch, mobile, fausses pistes et indices par tour.
+- Onglet **En jeu** (tableau de bord), **Rôles** (distribution + fiches joueur avec **QR code**), **Boîte** à requêtes triée.
+- **Portraits** des 40 personnages et illustrations des Atouts (vignettes WebP).
+- **Horloge** (wake-lock), **mode projection** plein écran, thème **jour/nuit**.
+- **Ambiance sonore** en boucle (horloge, orage) + sons d'événements.
+- **Bibliothèque** de parties (enregistrer / charger / dupliquer).
+
+## Crédits
+
+- Ambiance « Horloge » : *pendulum-slow-ten-o-clock* par **klankbeeld** (freesound.org), CC BY 4.0, via Wikimedia Commons.
+- Ambiance « Orage » : *Rain thunder and birds*, domaine public, via Wikimedia Commons.
+- QR : *qrcode-generator* (Kazuhiko Arase), licence MIT (dossier `vendor/`).

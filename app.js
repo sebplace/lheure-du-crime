@@ -14,13 +14,13 @@ const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
 /* ============ état global ============ */
 let DATA = null, BYNUM = {}, NEUTRAL = [], LABELS = {};
 const LSK = 'hdc_mj_v3', LIBK = 'hdc_mj_lib_v3', CURK = 'hdc_mj_cur_v3';
-const store = Object.assign({ theme: 'day', sound: true }, load(LSK));
+const store = Object.assign({ theme: 'day', sound: true, ambVol: 0.5 }, load(LSK));
 let LIB = load(LIBK) || [];
 let CURGAME = load(CURK) || null;
 
 function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
 function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
-const persist = () => save(LSK, { theme: store.theme, sound: store.sound });
+const persist = () => save(LSK, { theme: store.theme, sound: store.sound, ambVol: store.ambVol });
 const persistCur = () => save(CURK, CURGAME);
 const persistLib = () => save(LIBK, LIB);
 
@@ -60,7 +60,7 @@ const COMP_WHY = [
 fetch('data.json').then(r => r.json()).then(d => {
   DATA = d; NEUTRAL = d.neutral_dims; LABELS = d.labels;
   d.cast.forEach(c => BYNUM[c.num] = c);
-  initTheme(); initTabs(); initHeader(); initTable(); initPartie(); initClock(); initBoite(); registerSW();
+  initTheme(); initTabs(); initHeader(); initTable(); initPartie(); initClock(); initBoite(); initAmbiance(); registerSW();
   renderLibrary(); renderDashboard(); renderRoles();
   handleHash();
 }).catch(e => { document.querySelector('main').innerHTML = '<p class="warn">Impossible de charger les données du jeu.</p>'; console.error(e); });
@@ -221,7 +221,7 @@ function genererPartie(seed, nWanted, diff){
   batirIndices(g);
   CURGAME = g; persistCur();
   renderBrief(g); renderDashboard(); renderRoles();
-  location.hash = '';
+  return g;
 }
 
 function assignerRoles(g, rng){
@@ -263,6 +263,15 @@ function batirIndices(g){
 }
 const nomCourt = num => { const c = BYNUM[num]; if (!c) return '#' + num; const p = c.nom.split(' '); return '#' + num + ' ' + p[p.length - 1]; };
 const initiales = num => { const c = BYNUM[num]; if (!c) return '?'; const p = c.nom.replace(/^(Lord|Lady|Sir|Mme|M\.|Dr|Le|La|Miss|Colonel)\s+/i, '').split(' '); return (p[0][0] + (p[p.length - 1][0] || '')).toUpperCase(); };
+function avatarHtml(num, cls, style){
+  const c = BYNUM[num]; const extra = cls ? ' ' + cls : ''; const st = style ? ` style="${style}"` : '';
+  if (c && c.portrait) return `<img class="avatar${extra}" src="${c.portrait}" alt="" loading="lazy"${st}>`;
+  return `<div class="avatar${extra}"${st}>${initiales(num)}</div>`;
+}
+function atoutImg(nom, cls){
+  const a = DATA.atouts.find(x => x.nom === nom);
+  return a && a.img ? `<img class="atout-art${cls ? ' ' + cls : ''}" src="${a.img}" alt="" loading="lazy">` : '';
+}
 
 /* ---------- rendu Brief (onglet Partie) ---------- */
 function renderBrief(g){
@@ -288,7 +297,7 @@ function renderBrief(g){
       </div>
       <div class="card">
         <h3 class="fic">Le Cercle des trois</h3>
-        <div>${g.cercle.map(num => `<div class="prow"><div class="avatar ${num === g.coupable ? 'coup' : ''}">${initiales(num)}</div><div class="who">${suspLine(num)}</div></div>`).join('')}</div>
+        <div>${g.cercle.map(num => `<div class="prow">${avatarHtml(num, num === g.coupable ? 'coup' : '')}<div class="who">${suspLine(num)}</div></div>`).join('')}</div>
         <p class="tip">Mobile du Coupable : <b>${esc(g.mobile)}</b>.</p>
       </div>
       <div class="card">
@@ -363,6 +372,7 @@ function chargerScenario(s){
   batirIndices(g);
   CURGAME = g; persistCur(); renderBrief(g); renderDashboard(); renderRoles();
   $('#autoOut').scrollIntoView({ behavior: 'smooth' }); toast('Scénario « ' + s.titre + ' » chargé.');
+  return g;
 }
 
 /* ============ Cercle sur mesure ============ */
@@ -388,7 +398,7 @@ function trouverCercle(){
   if (!cs.length){ out.innerHTML = '<p class="warn">Aucun Cercle isolable avec ces présents. Modifiez la sélection.</p>'; return; }
   const trio = cs[0], iso = sharedTraits(trio, present);
   out.innerHTML = `<div class="card"><h3 class="fic">Cercle trouvé</h3>
-    <div>${trio.map(num => `<div class="prow"><div class="avatar">${initiales(num)}</div><div class="who"><b>${esc(BYNUM[num].nom)}</b><div class="r">${esc(BYNUM[num].role)}</div></div></div>`).join('')}</div>
+    <div>${trio.map(num => `<div class="prow">${avatarHtml(num)}<div class="who"><b>${esc(BYNUM[num].nom)}</b><div class="r">${esc(BYNUM[num].role)}</div></div></div>`).join('')}</div>
     <p>Isolé par : ${iso.map(([d, v]) => `${LABELS[d]} = <b>${esc(v)}</b>`).join(' · ')}</p>
     <p class="muted">${cs.length} Cercle(s) possible(s) au total. Désignez librement le Coupable parmi les trois.</p></div>`;
 }
@@ -491,11 +501,11 @@ function renderRoles(){
     const at = DATA.atouts.find(a => a.nom === p.atout);
     const r = el('div', 'card'); r.style.padding = '10px 12px'; r.style.margin = '7px 0';
     r.innerHTML = `<div class="prow" style="border:0;padding:0">
-        <div class="avatar ${p.role === 'coupable' ? 'coup' : ''}">${initiales(p.num)}</div>
+        ${avatarHtml(p.num, p.role === 'coupable' ? 'coup' : '')}
         <div class="who"><b>${esc(BYNUM[p.num].nom)}</b> <span class="tag ${p.camp === 'enq' ? 'enq' : p.camp === 'intr' ? 'intr' : p.role === 'coupable' ? 'coup' : 'malf'}">${p.role === 'coupable' ? 'Coupable' : p.role === 'complice' ? 'Complice' : p.role === 'intrigant' ? 'Intrigant' : 'Enquêteur'}</span>
           <div class="r">Atout : <b>${esc(p.atout)}</b>${at ? ' · <span class="muted">' + esc(at.timing) + '</span>' : ''}</div></div>
         <label class="dist-chk"><input type="checkbox" data-i="${i}" ${p.distribue ? 'checked' : ''}> remis</label></div>
-      <div class="muted" style="font-size:13px;margin-top:4px">${at ? '⚙️ ' + esc(at.effet) + '<br>' : ''}🗝️ ${esc(p.secret)}</div>
+      <div class="atout-line">${atoutImg(p.atout)}<div class="muted" style="font-size:13px">${at ? '⚙️ ' + esc(at.effet) + '<br>' : ''}🗝️ ${esc(p.secret)}</div></div>
       <div class="rowflex" style="margin-top:6px"><button class="ghost" data-link="${i}">🔗 Lien joueur</button></div>`;
     r.querySelector('input').onchange = e => { p.distribue = e.target.checked; persistCur(); renderRoles(); };
     r.querySelector('[data-link]').onclick = () => showPlayerCard(g, i);
@@ -505,23 +515,37 @@ function renderRoles(){
 }
 
 /* ---------- fiche joueur plein écran ---------- */
+function playerURL(g, idx){
+  const base = location.origin + location.pathname;
+  if (g.scenario) return base + '#s=' + String(g.seed).replace(/^S/, '') + '-' + idx;
+  return base + '#j=' + g.seed + '-' + g.n + '-' + g.diff + '-' + idx;
+}
 function showPlayerCard(g, idx){
   const p = g.players[idx], c = BYNUM[p.num], at = DATA.atouts.find(a => a.nom === p.atout);
   let ov = $('#playerCard'); if (!ov){ ov = el('div', 'projection'); ov.id = 'playerCard'; document.body.appendChild(ov); }
   const pub = Object.keys(LABELS).map(d => `${LABELS[d]} : <b>${esc(c.pub[d])}</b>`).join(' · ');
+  const url = playerURL(g, idx);
+  const portrait = c.portrait ? `<img src="${c.portrait}" alt="" class="pc-portrait">` : `<div class="avatar" style="width:96px;height:96px;font-size:34px;margin:0 auto 10px">${initiales(p.num)}</div>`;
   ov.innerHTML = `<button class="proj-close" id="pcClose">✕</button>
-    <div style="max-width:640px;width:92%;text-align:center">
-      <div class="avatar" style="width:72px;height:72px;font-size:28px;margin:0 auto 10px">${initiales(p.num)}</div>
+    <div class="pc-body">
+      ${portrait}
       <h2 style="font-family:'Playfair Display',serif;color:#e6c96a;margin:.2em 0">${esc(c.nom)}</h2>
       <p style="color:#c9a24a;font-style:italic">${esc(c.role)}</p>
       <p style="margin:12px 0;color:#ecdcc0">${pub}</p>
       <div style="border-top:1px solid rgba(201,162,74,.35);margin:14px 0;padding-top:12px">
-        <p style="color:#e6c96a;font-weight:700">Votre Atout : ${esc(p.atout)}</p>
-        ${at ? `<p style="color:#ecdcc0;font-size:15px">${esc(at.effet)}<br><span style="color:#c9a24a">Moment : ${esc(at.timing)}</span></p>` : ''}
+        <div class="pc-atout">${atoutImg(p.atout)}<div><p style="color:#e6c96a;font-weight:700;margin:.2em 0">Votre Atout : ${esc(p.atout)}</p>
+        ${at ? `<p style="color:#ecdcc0;font-size:15px;margin:.2em 0">${esc(at.effet)}<br><span style="color:#c9a24a">Moment : ${esc(at.timing)}</span></p>` : ''}</div></div>
       </div>
-      <p style="color:#9a8f80;font-size:13px">Mémorisez, puis rendez cette fiche au Meneur.</p>
+      <div class="pc-qr" id="pcQR" title="Ouvrir cette fiche sur un téléphone"></div>
+      <p style="color:#9a8f80;font-size:13px">Scannez pour ouvrir cette fiche sur votre téléphone, puis rendez l'écran au Meneur.</p>
     </div>`;
   ov.classList.add('on'); $('#pcClose').onclick = () => ov.classList.remove('on');
+  renderQR('#pcQR', url);
+}
+function renderQR(sel, url){
+  const box = $(sel); if (!box) return;
+  if (window.qrcode){ try { const qr = qrcode(0, 'M'); qr.addData(url); qr.make(); box.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); return; } catch (e) {} }
+  box.innerHTML = `<a href="${url}" style="color:#c9a24a;font-size:12px;word-break:break-all">${esc(url)}</a>`;
 }
 
 /* ============ BOÎTE à requêtes ============ */
@@ -582,14 +606,33 @@ function syncProjection(){ const w = $('#projWall'); if (!w) return; const g = C
 /* ============ liens partageables ============ */
 function handleHash(){
   const h = location.hash.slice(1); if (!h) return;
-  const g = new URLSearchParams(h.replace(/&/g, '&'));
-  if (h.startsWith('j=')){ // fiche joueur : j=seed-n-idx
-    const [seed, n, idx] = h.slice(2).split('-').map(Number);
-    genererPartie(seed, n, 'int'); // déterministe
-    if (CURGAME && CURGAME.players[idx]) showPlayerCard(CURGAME, idx);
-  } else if (h.startsWith('g=')){
-    const [seed, n] = h.slice(2).split('-').map(Number); genererPartie(seed, n, 'int'); goTab('partie');
+  if (h.startsWith('j=')){ // fiche joueur générée : j=seed-n-diff-idx
+    const parts = h.slice(2).split('-');
+    const seed = +parts[0], n = +parts[1], diff = parts[2], idx = +parts[3];
+    const g = genererPartie(seed, n, diff);
+    if (g && g.players[idx]) showPlayerCard(g, idx);
+  } else if (h.startsWith('s=')){ // fiche joueur scénario : s=<id>-idx
+    const [sid, idx] = h.slice(2).split('-'); const sc = DATA.scenarios.find(x => x.id === sid);
+    if (sc){ const g = chargerScenario(sc); if (g && g.players[+idx]) showPlayerCard(g, +idx); }
+  } else if (h.startsWith('g=')){ // partie complète : g=seed-n[-diff]
+    const parts = h.slice(2).split('-'); genererPartie(+parts[0], +parts[1], parts[2] || 'int'); goTab('partie');
   }
+}
+
+/* ============ ambiance sonore (boucles) ============ */
+const AMB = { el: null, cur: null };
+function ambPlay(name){
+  if (!name || AMB.cur === name){ ambStop(); return; }
+  ambStop();
+  AMB.el = new Audio('audio/' + name + '.ogg'); AMB.el.loop = true; AMB.el.volume = (store.ambVol != null ? store.ambVol : 0.5);
+  AMB.el.play().catch(() => {}); AMB.cur = name; updAmbUI();
+}
+function ambStop(){ if (AMB.el){ AMB.el.pause(); AMB.el = null; } AMB.cur = null; updAmbUI(); }
+function updAmbUI(){ $$('.amb-btn').forEach(b => b.classList.toggle('on', (b.dataset.amb || '') === (AMB.cur || ''))); }
+function initAmbiance(){
+  const v = $('#ambVol'); if (v){ v.value = Math.round((store.ambVol != null ? store.ambVol : 0.5) * 100); v.oninput = () => { store.ambVol = v.value / 100; if (AMB.el) AMB.el.volume = store.ambVol; persist(); }; }
+  $$('.amb-btn').forEach(b => b.onclick = () => ambPlay(b.dataset.amb));
+  updAmbUI();
 }
 
 /* ============ service worker ============ */
