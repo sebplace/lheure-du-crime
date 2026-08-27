@@ -189,6 +189,9 @@ footer a{color:var(--gold-lt)}
   border:1px solid var(--line);border-radius:7px;padding:6px 9px;cursor:pointer;transition:.12s;font:inherit;color:inherit}
 .chip:hover{background:var(--panel2)}
 .chip.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%, var(--panel));box-shadow:0 1px 6px var(--shadow)}
+.chip.cercle{border-color:var(--ox);border-width:2px;background:color-mix(in srgb,var(--ox) 16%, var(--panel))}
+.chip.cercle b{color:var(--ox)}
+.chip.cercle::after{content:"Cercle";display:block;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ox)}
 .chip b{font-size:13.5px;color:var(--ox)} .chip span{font-size:11.5px;color:var(--ink-soft)}
 .chk-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:14px;cursor:pointer}
 .chk-row input{accent-color:var(--ox)}

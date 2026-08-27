@@ -220,7 +220,7 @@ function genererPartie(seed, nWanted, diff){
   assignerRoles(g, mulberry32(seed ^ 0x1234abcd));
   batirIndices(g);
   CURGAME = g; persistCur();
-  renderBrief(g); renderDashboard(); renderRoles();
+  renderBrief(g); renderDashboard(); renderRoles(); syncGridToGame(g);
   return g;
 }
 
@@ -370,7 +370,7 @@ function chargerScenario(s){
   };
   assignerRoles(g, mulberry32(s.id.charCodeAt(0) * 7919));
   batirIndices(g);
-  CURGAME = g; persistCur(); renderBrief(g); renderDashboard(); renderRoles();
+  CURGAME = g; persistCur(); renderBrief(g); renderDashboard(); renderRoles(); syncGridToGame(g);
   $('#autoOut').scrollIntoView({ behavior: 'smooth' }); toast('Scénario « ' + s.titre + ' » chargé.');
   return g;
 }
@@ -381,26 +381,50 @@ function initCercleSurMesure(){
   DATA.cast.forEach(c => {
     const b = el('button', 'chip'); b.dataset.num = c.num;
     b.innerHTML = `<b>${nomCourt(c.num)}</b><span>${esc(c.role)}</span>`;
-    b.onclick = () => { b.classList.toggle('on'); updCount(); };
+    b.onclick = () => { b.classList.toggle('on'); if (!b.classList.contains('on')) b.classList.remove('cercle'); updCount(); };
     grid.appendChild(b);
   });
-  $('#selDefault').onclick = () => { const def = DATA.scenarios[0]; const set = new Set(def.cercle.concat(def.complices, def.intrigants, def.enq)); $$('#castGrid .chip').forEach(b => b.classList.toggle('on', set.has(+b.dataset.num))); updCount(); };
-  $('#selClear').onclick = () => { $$('#castGrid .chip').forEach(b => b.classList.remove('on')); updCount(); };
+  $('#selDefault').onclick = () => {
+    let set, cercle, coup = null;
+    if (CURGAME && CURGAME.present){ set = new Set(CURGAME.present); cercle = CURGAME.cercle; coup = CURGAME.coupable; }
+    else { const def = DATA.scenarios[0]; set = new Set(def.cercle.concat(def.complices, def.intrigants, def.enq)); cercle = def.cercle; }
+    $$('#castGrid .chip').forEach(b => b.classList.toggle('on', set.has(+b.dataset.num)));
+    markCercleChips(cercle); updCount(); renderCercleFound(cercle, [...set], coup);
+  };
+  $('#selClear').onclick = () => { $$('#castGrid .chip').forEach(b => b.classList.remove('on', 'cercle')); updCount(); $('#cercleOut').innerHTML = ''; };
   $('#genCercle').onclick = trouverCercle;
-  updCount();
+  updCount(); updSelDefaultLabel();
 }
 const selNums = () => $$('#castGrid .chip.on').map(b => +b.dataset.num);
 function updCount(){ $('#selCount').textContent = selNums().length; }
+function markCercleChips(cercle){ const set = new Set(cercle || []); $$('#castGrid .chip').forEach(b => b.classList.toggle('cercle', set.has(+b.dataset.num))); }
+function updSelDefaultLabel(){ const b = $('#selDefault'); if (b) b.textContent = (CURGAME && CURGAME.present) ? '↑ Reprendre la partie en cours' : 'Sélection type (14)'; }
+function syncGridToGame(g){
+  if (!g || !g.present || !$('#castGrid')) return;
+  const set = new Set(g.present);
+  $$('#castGrid .chip').forEach(b => b.classList.toggle('on', set.has(+b.dataset.num)));
+  markCercleChips(g.cercle); updCount(); updSelDefaultLabel();
+  renderCercleFound(g.cercle, g.present, g.coupable);
+}
+function renderCercleFound(trio, present, coupable){
+  const out = $('#cercleOut'); if (!out) return;
+  if (!trio || !trio.length){ out.innerHTML = ''; return; }
+  const cs = cerclesValides(present); const iso = sharedTraits(trio, present);
+  out.innerHTML = `<div class="card"><h3 class="fic">Cercle ${coupable ? 'de la partie en cours' : 'trouvé'}</h3>
+    <div>${trio.map(num => `<div class="prow">${avatarHtml(num, coupable === num ? 'coup' : '')}<div class="who"><b>${esc(BYNUM[num].nom)}</b><div class="r">${esc(BYNUM[num].role)}${coupable === num ? ' · <span class="tag coup">Coupable</span>' : ''}</div></div></div>`).join('')}</div>
+    <p>Isolé par : ${iso.map(([d, v]) => `${LABELS[d]} = <b>${esc(v)}</b>`).join(' · ')}</p>
+    <p class="muted">${cs.length} Cercle(s) possible(s) avec ces présents.${coupable ? '' : ' Désignez librement le Coupable parmi les trois.'}</p></div>`;
+}
 function trouverCercle(){
   const present = selNums(); const out = $('#cercleOut');
   if (present.length < 6){ out.innerHTML = '<p class="warn">Cochez au moins 6 présents.</p>'; return; }
+  // si une partie est en cours et son Cercle tient dans la sélection, le proposer en priorité
+  if (CURGAME && CURGAME.cercle && CURGAME.cercle.every(x => present.includes(x)) && isole(CURGAME.cercle, present)){
+    markCercleChips(CURGAME.cercle); renderCercleFound(CURGAME.cercle, present, CURGAME.coupable); return;
+  }
   const cs = cerclesValides(present, mulberry32((Math.random() * 1e9) | 0));
   if (!cs.length){ out.innerHTML = '<p class="warn">Aucun Cercle isolable avec ces présents. Modifiez la sélection.</p>'; return; }
-  const trio = cs[0], iso = sharedTraits(trio, present);
-  out.innerHTML = `<div class="card"><h3 class="fic">Cercle trouvé</h3>
-    <div>${trio.map(num => `<div class="prow">${avatarHtml(num)}<div class="who"><b>${esc(BYNUM[num].nom)}</b><div class="r">${esc(BYNUM[num].role)}</div></div></div>`).join('')}</div>
-    <p>Isolé par : ${iso.map(([d, v]) => `${LABELS[d]} = <b>${esc(v)}</b>`).join(' · ')}</p>
-    <p class="muted">${cs.length} Cercle(s) possible(s) au total. Désignez librement le Coupable parmi les trois.</p></div>`;
+  markCercleChips(cs[0]); renderCercleFound(cs[0], present, null);
 }
 
 /* ============ EN JEU : tableau de bord ============ */
