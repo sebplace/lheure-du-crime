@@ -1,34 +1,41 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="day">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>L'Heure du Crime — Console du Meneur de Jeu</title>
-<meta name="description" content="Compagnon du Meneur de Jeu pour la murder party L'Heure du Crime : composer la table, bâtir un Cercle isolant, mener la partie.">
+<meta name="description" content="Compagnon du Meneur de Jeu pour la murder party L'Heure du Crime : générer une partie, composer la table, horloge de jeu, mener la session.">
+<meta name="theme-color" content="#6e222b">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-
 </head>
 <body>
+<div class="chime" id="chime"></div>
+
 <header class="top">
+  <div class="hdr-tools">
+    <button id="soundBtn" title="Son du carillon">🔔</button>
+    <button id="themeBtn" title="Mode jour / nuit">☾</button>
+  </div>
   <svg class="clock" viewBox="0 0 100 100" aria-hidden="true">
-    <circle cx="50" cy="50" r="44" fill="none" stroke="#a9842f" stroke-width="2"/>
-    <circle cx="50" cy="50" r="37" fill="none" stroke="#a9842f" stroke-width="1"/>
-    <line x1="50" y1="50" x2="50" y2="26" stroke="#6e222b" stroke-width="2.6" stroke-linecap="round"/>
-    <line x1="50" y1="50" x2="66" y2="54" stroke="#6e222b" stroke-width="2.2" stroke-linecap="round"/>
-    <circle cx="50" cy="50" r="2.6" fill="#6e222b"/>
+    <circle cx="50" cy="50" r="44" fill="none" stroke="var(--gold)" stroke-width="2"/>
+    <circle cx="50" cy="50" r="37" fill="none" stroke="var(--gold)" stroke-width="1"/>
+    <line x1="50" y1="50" x2="50" y2="26" stroke="var(--ox)" stroke-width="2.6" stroke-linecap="round"/>
+    <line x1="50" y1="50" x2="66" y2="54" stroke="var(--ox)" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="50" cy="50" r="2.6" fill="var(--ox)"/>
   </svg>
   <h1>L'Heure du Crime</h1>
   <div class="sub">Console du Meneur de Jeu</div>
 </header>
 
 <nav class="tabs">
-  <button data-tab="table" class="active">Composer la table</button>
-  <button data-tab="cercle">Bâtir un Cercle</button>
-  <button data-tab="conduite">Mener la partie</button>
+  <button data-tab="table" class="active">Table</button>
+  <button data-tab="generateur">Générateur</button>
+  <button data-tab="horloge">Horloge</button>
+  <button data-tab="conduite">Conduite</button>
   <button data-tab="aide">Aide-mémoire</button>
 </nav>
 
@@ -37,53 +44,87 @@
   <section id="table" class="panel active">
     <h2 class="sec">Combien de convives&nbsp;?</h2>
     <div class="rowflex">
-      <label>Joueurs :
-        <select id="npl"></select>
-      </label>
+      <label>Joueurs : <select id="npl"></select></label>
       <span class="muted">(hors Meneur de Jeu)</span>
     </div>
     <div id="compo"></div>
   </section>
 
-  <!-- ============ CERCLE ============ -->
-  <section id="cercle" class="panel">
-    <h2 class="sec">Charger un scénario d'initiation</h2>
+  <!-- ============ GÉNÉRATEUR ============ -->
+  <section id="generateur" class="panel">
+    <h2 class="sec">Générer une partie complète</h2>
+    <p class="muted">Une intrigue clé en main : table, distribution des rôles, Cercle isolant, Indices,
+      fausses pistes et alignement Secrets / Rumeurs. Chaque partie a une <b>graine</b> partageable.</p>
+    <div class="rowflex">
+      <label>Taille : <select id="autoN"><option value="0">au hasard</option></select></label>
+      <button class="act big-act" id="autoGen">🎲 Générer une partie</button>
+    </div>
+    <div id="autoOut"></div>
+
+    <h2 class="sec">Scénarios d'initiation</h2>
     <div class="rowflex" id="scenBtns"></div>
 
-    <h2 class="sec">…ou générer un Cercle sur mesure</h2>
-    <p class="muted">Cochez les personnages <b>présents</b> à votre table, puis laissez la console
-      isoler un Cercle de trois suspects sur les traits publics.</p>
+    <h2 class="sec">Cercle sur mesure</h2>
+    <p class="muted">Cochez les personnages <b>présents</b>, la console isole un Cercle de trois suspects.</p>
     <div class="rowflex" style="margin:6px 0">
       <button class="ghost" id="selDefault">Sélection type (14)</button>
       <button class="ghost" id="selClear">Tout décocher</button>
       <span class="muted"><span id="selCount">0</span> cochés</span>
     </div>
     <div class="grid" id="castGrid"></div>
-    <div class="rowflex" style="margin-top:10px">
-      <button class="act" id="genCercle">Trouver un Cercle isolant</button>
-    </div>
+    <div class="rowflex" style="margin-top:10px"><button class="act" id="genCercle">Trouver un Cercle isolant</button></div>
     <div id="cercleOut"></div>
+  </section>
+
+  <!-- ============ HORLOGE ============ -->
+  <section id="horloge" class="panel">
+    <div class="clockface">
+      <div class="timer" id="timer">10:00</div>
+      <div class="phase-name" id="phaseName">Audience</div>
+    </div>
+    <div class="phase-btns" id="phaseBtns">
+      <button data-min="10" data-name="Audience" class="sel">Audience · 10 min</button>
+      <button data-min="15" data-name="Investigation">Investigation · 15 min</button>
+      <button data-min="5" data-name="Délibéré">Délibéré · 5 min</button>
+    </div>
+    <div class="rowflex" style="justify-content:center">
+      <label>Minutes : <input type="number" id="customMin" min="1" max="60" value="10" style="width:70px"></label>
+      <button class="ghost" id="setCustom">Régler</button>
+    </div>
+    <div class="timer-ctl">
+      <button class="act" id="startBtn">▶ Démarrer</button>
+      <button class="ghost" id="resetBtn">↻ Réinitialiser</button>
+      <button class="ghost" id="minus1">−1 min</button>
+      <button class="ghost" id="plus1">+1 min</button>
+      <button class="ghost" id="nextPhase">Phase suivante →</button>
+    </div>
+    <div class="tip" style="text-align:center">Au zéro, le <b>Carillon</b> sonne (son + éclat doré) : la phase est close.
+      « Phase suivante » enchaîne Audience → Investigation → Délibéré, et relance l'horloge.</div>
   </section>
 
   <!-- ============ CONDUITE ============ -->
   <section id="conduite" class="panel">
-    <h2 class="sec">Ouverture</h2>
+    <div class="rowflex between">
+      <h2 class="sec" style="border:none;margin-bottom:0">Suivi de la partie</h2>
+      <button class="ghost" id="resetSession" style="font-size:13px">Nouvelle partie</button>
+    </div>
+
+    <h3 class="sub">Ouverture</h3>
     <ul class="checklist" id="ouverture">
-      <li>Planter le décor + découverte du corps (un PNJ, jamais un joueur)</li>
-      <li>Annoncer le recensement partiel (total des perturbateurs, sans le détail)</li>
+      <li>Décor + découverte du corps (un PNJ, jamais un joueur)</li>
+      <li>Recensement partiel (total des perturbateurs, sans le détail)</li>
       <li>Distribuer personnages + Atouts + 1 carte Secret / joueur</li>
-      <li>Reconnaissances secrètes (alliés des Malfaiteurs, cible du Vengeur ; « Rien à signaler » aux autres)</li>
+      <li>Reconnaissances secrètes (alliés Malfaiteurs, cible du Vengeur ; « Rien à signaler » aux autres)</li>
       <li>Distribuer 2 Rumeurs / joueur + consigne d'échange</li>
-      <li>Prévenir : « mes apartés ne sont jamais un indice »</li>
-      <li>Présenter le dossier d'ouverture (1 Indice + 1 par tranche de ~6 joueurs)</li>
+      <li>« Mes apartés ne sont jamais un indice »</li>
+      <li>Dossier d'ouverture (1 Indice + 1 par tranche de ~6 joueurs)</li>
     </ul>
 
-    <h2 class="sec">Compteurs</h2>
     <div class="card">
-      <div class="rowflex" style="justify-content:space-between">
+      <div class="rowflex between">
         <div><h3 class="sub">Actes d'accusation restants</h3>
           <div class="counter"><button id="actMinus">−</button><span class="val" id="actVal">2</span><button id="actPlus">+</button></div>
-          <p class="muted" style="font-size:13px">2 pour toute la partie · chaque accusation en coûte un, quel que soit son résultat.</p>
+          <p class="muted" style="font-size:13px">2 pour toute la partie · chaque accusation en coûte un.</p>
         </div>
         <div><h3 class="sub">Tour</h3>
           <div class="counter"><button id="tourMinus">−</button><span class="val" id="tourVal">1</span><button id="tourPlus">+</button></div>
@@ -91,19 +132,22 @@
       </div>
     </div>
 
-    <h2 class="sec">Investigation — ordre de la boîte à requêtes</h2>
+    <h3 class="sub">Mur d'enquête — Indices révélés</h3>
     <div class="card">
-      <p><span class="pill">1 · Protection</span> <span class="pill">2 · Perturbation</span>
-         <span class="pill">3 · Information</span> <span class="pill">4 · Meurtre</span></p>
-      <p class="muted" style="font-size:13px">Tout le monde dépose un billet (même « je passe ») ; réponse pliée à chacun. Rien avant le Carillon.</p>
+      <div class="rowflex"><input type="text" id="clueInput" placeholder="ex. Le meurtrier est gaucher" style="flex:1;min-width:180px"><button class="act" id="addClue">Épingler</button></div>
+      <ul class="checklist" id="clueList" style="margin-top:8px"></ul>
     </div>
 
-    <h2 class="sec">Second meurtre &amp; Fantôme</h2>
-    <div class="tip">Au cœur de la partie (ou plus tôt si le Coupable est <b>enhardi</b>), il frappe une
-      <b>seule fois de plus</b> — jamais un Malfaiteur. La victime devient <b>Fantôme</b> : elle garde son
-      <b>vote final</b> et révèle un <b>dernier indice</b> qui fait avancer l'enquête.</div>
+    <h3 class="sub">Investigation — ordre de la boîte à requêtes</h3>
+    <div class="card"><p><span class="pill">1 · Protection</span> <span class="pill">2 · Perturbation</span>
+      <span class="pill">3 · Information</span> <span class="pill">4 · Meurtre</span></p>
+      <p class="muted" style="font-size:13px">Tout le monde dépose un billet (même « je passe ») ; réponse pliée à chacun. Rien après le Carillon.</p></div>
 
-    <h2 class="sec">Qui l'emporte</h2>
+    <h3 class="sub">Second meurtre &amp; Fantôme</h3>
+    <div class="tip">Le Coupable frappe une <b>seule fois de plus</b> (jamais un Malfaiteur). La victime devient
+      <b>Fantôme</b> : elle garde son <b>vote final</b> et livre un <b>dernier indice</b> qui fait avancer l'enquête.</div>
+
+    <h3 class="sub">Qui l'emporte</h3>
     <table>
       <tr><th>Camp</th><th>Victoire si…</th></tr>
       <tr><td><b>Enquêteurs</b></td><td>le vrai Coupable est accusé à la majorité avant la fin.</td></tr>
@@ -122,15 +166,12 @@
       <b>l'intersection d'au moins deux traits</b> qui isole les trois finalistes. La Pilosité ne sert
       jamais à isoler (décor et fausse piste).</p>
     <h2 class="sec">Les deux entonnoirs</h2>
-    <table>
-      <tr><th>Couche</th><th>Support</th><th>Va de…</th></tr>
+    <table><tr><th>Couche</th><th>Support</th><th>Va de…</th></tr>
       <tr><td>Publique</td><td>Indices (traits publics)</td><td>la table → 3</td></tr>
-      <tr><td>Privée</td><td>Secrets + Rumeurs</td><td>3 → 1</td></tr>
-    </table>
+      <tr><td>Privée</td><td>Secrets + Rumeurs</td><td>3 → 1</td></tr></table>
     <h2 class="sec">Aligner les Secrets</h2>
-    <p><b>Coupable</b> → une carte Secret <b>accablante</b> (2 faits à charge, aucune décharge) : aucune
-      exonération, il ne peut que bluffer. <b>Chaque leurre</b> → une carte Secret contenant le fait de sa
-      <b>Rumeur-décharge</b> : sa décharge circule et le blanchit.</p>
+    <p><b>Coupable</b> → carte Secret <b>accablante</b> (2 faits à charge, aucune décharge) : aucune exonération.
+      <b>Chaque leurre</b> → carte Secret contenant le fait de sa <b>Rumeur-décharge</b> : sa décharge circule et le blanchit.</p>
     <h2 class="sec">Difficulté avancée</h2>
     <p>Coupez le Corbeau · armez les Complices (Maquilleur, Étouffeur, Faussaire, Usurpateur) · fausses
       pistes plus serrées · un Intrigant comme leurre · retirez le levier d'Alibi.</p>
@@ -138,7 +179,7 @@
 </main>
 
 <footer>
-  L'Heure du Crime — murder party d'enquête victorienne · Console MJ · aucune donnée n'est envoyée, tout tourne dans votre navigateur.
+  L'Heure du Crime — murder party d'enquête victorienne · Console MJ · tout tourne dans votre navigateur, aucune donnée envoyée.
 </footer>
 
 <script src="app.js"></script>
