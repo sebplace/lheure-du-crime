@@ -1,306 +1,600 @@
+/* L'Heure du Crime — Console du Meneur de Jeu — v3
+   100% navigateur, hors-ligne, sans serveur. Génération déterministe par graine. */
 'use strict';
-/* ============================================================
-   L'Heure du Crime — Console MJ (v2)
-   ============================================================ */
-let DATA=null, BYNUM={};
-const NEUTRAL=["main","bague","cheveux","silhouette","signe"];
-const $=id=>document.getElementById(id);
-const LS='hdc_mj_v2';
 
-/* ---------- persistance ---------- */
-const store={theme:'day',sound:true,acts:2,tour:1,ouverture:[],clues:[]};
-function save(){try{localStorage.setItem(LS,JSON.stringify(store))}catch(e){}}
-function load(){try{Object.assign(store,JSON.parse(localStorage.getItem(LS)||'{}'))}catch(e){}}
-
-/* ---------- RNG seedable ---------- */
+/* ============ utilitaires ============ */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
-function shuffle(arr,rng){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function shuffle(arr, rng){ const a = arr.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
 
-/* ---------- phrasing Indices ---------- */
-const PHRASE={
-  main:{Gaucher:"est gaucher",Droitier:"est droitier"},
-  bague:{Chevalière:"porte une chevalière",Alliance:"porte une alliance",Aucune:"ne porte aucune bague"},
-  cheveux:{Bruns:"a les cheveux bruns",Noirs:"a les cheveux noirs",Blonds:"est blond",
-    "Poivre-et-sel":"a les cheveux poivre-et-sel",Roux:"est roux",Chauve:"est chauve"},
-  silhouette:{Grand:"est de grande taille",Petit:"est de petite taille",Mince:"est mince",Corpulent:"est de forte carrure"},
-  signe:{Canne:"porte une canne",Lorgnon:"porte un lorgnon",Cicatrice:"a une cicatrice",
-    "Grain de beauté":"a un grain de beauté visible",Aucun:"n'a aucun signe distinctif"},
-  pilosite:{Favoris:"porte des favoris",Barbe:"porte la barbe",Moustache:"porte la moustache",Glabre:"est glabre"}
-};
-const phrase=(d,v)=>"Le meurtrier "+((PHRASE[d]&&PHRASE[d][v])||(d+" = "+v))+".";
-const nom=n=>BYNUM[n]?BYNUM[n].nom:("#"+n);
-const surnom=n=>BYNUM[n]?BYNUM[n].nom.split(' ').slice(-1)[0]:("#"+n);
-const role=n=>BYNUM[n]?BYNUM[n].role:"";
+/* ============ état global ============ */
+let DATA = null, BYNUM = {}, NEUTRAL = [], LABELS = {};
+const LSK = 'hdc_mj_v3', LIBK = 'hdc_mj_lib_v3', CURK = 'hdc_mj_cur_v3';
+const store = Object.assign({ theme: 'day', sound: true }, load(LSK));
+let LIB = load(LIBK) || [];
+let CURGAME = load(CURK) || null;
 
-/* ---------- moteur de constructibilité ---------- */
-function* combos(arr,k,start=0,acc=[]){
-  if(acc.length===k){yield acc.slice();return;}
-  for(let i=start;i<arr.length;i++){acc.push(arr[i]);yield* combos(arr,k,i+1,acc);acc.pop();}
+function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
+function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+const persist = () => save(LSK, { theme: store.theme, sound: store.sound });
+const persistCur = () => save(CURK, CURGAME);
+const persistLib = () => save(LIBK, LIB);
+
+/* ============ classification des Atouts ============ */
+const INFO = ['Le Médium', 'Le Légiste', 'Le Détective', 'Le Notaire', 'Le Psychologue', 'Le Commissaire', 'Le Journaliste', 'Le Fouineur', 'Le Majordome', "L'Archiviste"];
+const PROTECT = ['Le Confesseur'];
+const ANTIPERT = ["L'Avocat", "L'Enquêteur de terrain"];
+const PERT = ['Le Maquilleur', "L'Étouffeur", 'Le Faussaire', "L'Usurpateur", 'Le Corrupteur'];
+const MALF_DEF = ['Le Complice', 'Le Bouc émissaire', "L'Ombre"];
+
+/* ============ narratif ============ */
+const VICTIMES = [
+  ['Lord Ashcombe', 'empoisonné au porto'], ['Lady Ravenscroft', 'étranglée dans la bibliothèque'],
+  ['Sir Edmund Vale', 'poignardé près de la serre'], ['la Comtesse de Merteuil', 'précipitée du belvédère'],
+  ['le colonel Harding', 'abattu dans le fumoir'], ['le notaire Crane', 'noyé dans le bassin'],
+  ['Mme de Vessac', 'foudroyée par un cordial'], ['le banquier Osborne', 'étouffé sous un oreiller'],
+];
+const MOBILES = [
+  'un héritage qu\'on lui refusait', 'une dette de jeu impossible à honorer',
+  'un secret que la victime menaçait d\'ébruiter', 'une vieille vengeance enfin mûre',
+  'une passion éconduite tournée à la haine', 'une fraude sur le point d\'éclater',
+  'une place au domaine qu\'on allait lui retirer', 'un chantage qui avait trop duré',
+];
+const REDH = [
+  'on l\'a vu·e rôder près des lieux peu avant l\'heure du crime',
+  'une vieille querelle publique l\'opposait à la victime',
+  'son emploi du temps de la soirée comporte un trou inexpliqué',
+  'un objet lui appartenant a été retrouvé tout près du corps',
+  'il·elle avait tout à gagner à la disparition de la victime',
+];
+const COMP_WHY = [
+  'lié·e au Coupable par une dette ancienne', 'uni·e au Coupable par un secret partagé',
+  'a tout à perdre si le Coupable tombe', 'agit par loyauté aveugle envers le Coupable',
+];
+
+/* ============ boot ============ */
+fetch('data.json').then(r => r.json()).then(d => {
+  DATA = d; NEUTRAL = d.neutral_dims; LABELS = d.labels;
+  d.cast.forEach(c => BYNUM[c.num] = c);
+  initTheme(); initTabs(); initHeader(); initTable(); initPartie(); initClock(); initBoite(); registerSW();
+  renderLibrary(); renderDashboard(); renderRoles();
+  handleHash();
+}).catch(e => { document.querySelector('main').innerHTML = '<p class="warn">Impossible de charger les données du jeu.</p>'; console.error(e); });
+
+/* ============ thème / son / onglets / header ============ */
+function initTheme(){ document.documentElement.dataset.theme = store.theme; syncThemeBtn(); }
+function syncThemeBtn(){ const b = $('#themeBtn'); if (b) b.textContent = store.theme === 'night' ? '☀' : '☾'; }
+function syncSoundBtn(){ const b = $('#soundBtn'); if (b) b.textContent = store.sound ? '🔔' : '🔕'; }
+
+function initTabs(){
+  $$('.tabs button').forEach(b => b.onclick = () => {
+    $$('.tabs button').forEach(x => x.classList.remove('active'));
+    $$('main .panel').forEach(x => x.classList.remove('active'));
+    b.classList.add('active'); $('#' + b.dataset.tab).classList.add('active');
+    if (b.dataset.tab === 'enjeu') renderDashboard();
+    if (b.dataset.tab === 'roles') renderRoles();
+    window.scrollTo(0, 0);
+  });
 }
-function isole(trio,present){
-  const pub=present.map(n=>BYNUM[n].pub), pos={};present.forEach((n,i)=>pos[n]=i);
-  const t=trio.map(n=>pos[n]);
-  const shared=NEUTRAL.filter(d=>pub[t[0]][d]===pub[t[1]][d]&&pub[t[1]][d]===pub[t[2]][d]);
-  for(let k=2;k<=shared.length;k++)for(const c of combos(shared,k)){
-    const vals={};c.forEach(d=>vals[d]=pub[t[0]][d]);
-    const match=present.map((n,i)=>i).filter(i=>c.every(d=>pub[i][d]===vals[d]));
-    if(match.length===3&&t.every(x=>match.includes(x)))return{combo:c,vals};
-  }
+function goTab(name){ const b = $(`.tabs button[data-tab="${name}"]`); if (b) b.click(); }
+
+function initHeader(){
+  syncSoundBtn();
+  $('#themeBtn').onclick = () => { store.theme = store.theme === 'night' ? 'day' : 'night'; document.documentElement.dataset.theme = store.theme; syncThemeBtn(); persist(); };
+  $('#soundBtn').onclick = () => { store.sound = !store.sound; syncSoundBtn(); persist(); if (store.sound) bell(880, 0, .3); };
+  // installation PWA
+  let deferred = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('#installBtn').style.display = ''; });
+  $('#installBtn').onclick = async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; $('#installBtn').style.display = 'none'; };
+}
+
+/* ============ audio ============ */
+let AC = null;
+function ac(){ if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); return AC; }
+function bell(freq, t0, dur, type){ if (!store.sound) return; const c = ac(); const o = c.createOscillator(), g = c.createGain(); o.type = type || 'triangle'; o.frequency.value = freq; const t = c.currentTime + t0; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + 0.05); }
+function carillon(){ [[659, 0], [523, .28], [587, .56], [392, .9]].forEach(([f, t]) => bell(f, t, .9)); }
+function glas(){ [0, .9, 1.8].forEach(t => bell(147, t, 1.6, 'sine')); }   // 2e meurtre
+function maillet(){ bell(196, 0, .12, 'square'); bell(160, .14, .18, 'square'); } // accusation
+
+/* ============ TABLE (composition §12.1) ============ */
+function initTable(){
+  const sel = $('#npl'); DATA.table.forEach(t => sel.appendChild(new Option(t.n + ' joueurs', t.n)));
+  sel.value = 14; sel.onchange = renderCompo; renderCompo();
+}
+function renderCompo(){
+  const n = +$('#npl').value, t = DATA.table.find(x => x.n === n); if (!t) return;
+  const cells = [['Enquêteurs', t.enq, 'enq'], ['Coupable', t.coup, 'coup'], ['Complice', t.comp, 'malf'], ['Intrigant', t.intr, 'intr']]
+    .filter(c => c[1] > 0).map(([lab, v, k]) => `<div class="dash-mini"><div class="k">${lab}</div><div class="v">${v}</div><div class="tag ${k}" style="margin-top:4px">${k === 'enq' ? 'Enquête' : k === 'coup' ? 'Meurtre' : k === 'malf' ? 'Malfaiteur' : 'Intrigue'}</div></div>`).join('');
+  $('#compo').innerHTML = `<div class="dash-top" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">${cells}</div>
+    <table><tr><th>Paramètre</th><th>Valeur</th></tr>
+      <tr><td>Tours d'enquête</td><td>${t.tours}</td></tr>
+      <tr><td>Actes d'accusation</td><td><b>${t.actes}</b></td></tr>
+      <tr><td>Corbeau (dernier indice)</td><td>${n <= 12 ? 'Recommandé (débutants)' : 'Optionnel'}</td></tr>
+      <tr><td>Carte d'équilibrage</td><td>${t.carte && t.carte !== 'â€”' ? t.carte : '—'}</td></tr>
+    </table>
+    <div class="tip">Répartition officielle pour ${n} convives (hors MJ). La table de 8 reçoit un Complice pour aplatir la courbe.</div>`;
+}
+
+/* ============ moteur de constructibilité (Cercle) ============ */
+/* Règle du jeu : le Cercle est isolé par l'INTERSECTION d'au moins deux traits publics
+   flous — pas par un trait unique. Il faut qu'existe une paire de traits partagés par les
+   trois dont aucun autre présent ne réunit les deux valeurs. */
+function sharedDims(trio){
+  return NEUTRAL.filter(d => { const v = BYNUM[trio[0]].pub[d]; return BYNUM[trio[1]].pub[d] === v && BYNUM[trio[2]].pub[d] === v; });
+}
+function pairIsole(trio, present, d1, d2){
+  const v1 = BYNUM[trio[0]].pub[d1], v2 = BYNUM[trio[0]].pub[d2];
+  return !present.some(p => !trio.includes(p) && BYNUM[p].pub[d1] === v1 && BYNUM[p].pub[d2] === v2);
+}
+function isolatingPair(trio, present){
+  const S = sharedDims(trio);
+  for (let i = 0; i < S.length; i++) for (let j = i + 1; j < S.length; j++)
+    if (pairIsole(trio, present, S[i], S[j])) return [S[i], S[j]];
   return null;
 }
-function cerclesValides(present){const out=[];for(const trio of combos(present,3)){const r=isole(trio,present);if(r)out.push({trio:trio.slice(),iso:r});}return out;}
-
-/* fausse piste : trait partagé par >=3 présents, incluant <=1 membre du Cercle */
-function fausse(present,cercle,isoDims){
-  const cand=[];
-  for(const d of NEUTRAL.concat(['pilosite'])){
-    const groups={};present.forEach(n=>{(groups[BYNUM[n].pub[d]]=groups[BYNUM[n].pub[d]]||[]).push(n);});
-    for(const v in groups){
-      if(isoDims.includes(d)&&groups[v].some(n=>cercle.includes(n)&&BYNUM[n].pub[d]===v)&&groups[v].filter(n=>cercle.includes(n)).length===3)continue;
-      const inC=groups[v].filter(n=>cercle.includes(n)).length;
-      if(groups[v].length>=3&&inC<=1)cand.push({d,v,membres:groups[v],inC});
-    }
+function isole(trio, present){ return !!isolatingPair(trio, present); }
+function sharedTraits(trio, present){
+  const pr = isolatingPair(trio, present);
+  const dims = pr || sharedDims(trio);
+  return dims.map(d => [d, BYNUM[trio[0]].pub[d]]);
+}
+function cerclesValides(present, rng){
+  const res = []; const P = present;
+  for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++) for (let k = j + 1; k < P.length; k++){
+    const trio = [P[i], P[j], P[k]]; if (isole(trio, P)) res.push(trio);
   }
-  cand.sort((a,b)=>b.inC-a.inC||b.membres.length-a.membres.length);
-  return cand[0]||null;
+  return rng ? shuffle(res, rng) : res;
 }
 
-/* ---------- rendu Cercle ---------- */
-function cercleBlock(coupable,leurres,iso){
-  const indices=Object.entries(iso.vals).map(([d,v])=>phrase(d,v));
-  let h='<div class="card"><h3 class="sub">Les 3 suspects (le Cercle)</h3>';
-  h+=`<div class="suspect coup"><b>${nom(coupable)}</b> <span class="muted">— ${role(coupable)}</span> · <b class="ox">COUPABLE</b></div>`;
-  leurres.forEach(l=>h+=`<div class="suspect"><b>${nom(l)}</b> <span class="muted">— ${role(l)}</span> · leurre innocent</div>`);
-  h+='</div>';
-  h+='<div class="card"><h3 class="sub">Indices-vérité à révéler (flou → décisif)</h3><ul>';
-  indices.forEach(i=>h+=`<li>🟢 « ${i} »</li>`);
-  h+=`</ul><div class="tip">Ces ${indices.length} traits, croisés, isolent <b>exactement</b> ces trois suspects.</div></div>`;
-  h+='<div class="card"><h3 class="sub">Aligner Secrets &amp; Rumeurs</h3><table><tr><th>Suspect</th><th>Carte Secret à donner</th></tr>';
-  h+=`<tr><td><b>${surnom(coupable)}</b> (Coupable)</td><td>Secret <b>accablant</b> (2 faits à charge, <b>aucune décharge</b>) → aucune exonération.</td></tr>`;
-  leurres.forEach(l=>h+=`<tr><td>${surnom(l)} (leurre)</td><td>Secret contenant <b>« ${BYNUM[l].rumeur_decharge} »</b> <span class="muted">(sa Rumeur-décharge)</span> → il se blanchit.</td></tr>`);
-  h+='</table><p class="muted" style="font-size:13px">Mettez en jeu les Rumeurs des 3 suspects + du bruit. Les leurres ont une décharge vraie ; le Coupable, aucune.</p></div>';
-  return h;
+/* ============ PHRASE (indice depuis un trait) ============ */
+const PHRASE = {
+  main: { Gaucher: 'est gaucher·ère', Droitier: 'est droitier·ère' },
+  bague: v => `porte ${/^[AEIOUÉ]/i.test(v) ? "l'" + v.toLowerCase() : 'une ' + v.toLowerCase()}`,
+  cheveux: v => `a les cheveux ${v.toLowerCase()}`,
+  silhouette: v => `est de silhouette ${v.toLowerCase()}`,
+  signe: v => `se distingue par ${/^[AEIOUÉ]/i.test(v) ? "l'" + v.toLowerCase() : 'un·e ' + v.toLowerCase()}`,
+};
+function indiceTxt(dim, val){
+  let p; const f = PHRASE[dim];
+  if (typeof f === 'function') p = f(val); else if (f && f[val]) p = f[val]; else p = `a « ${val} »`;
+  return `Le meurtrier ${p}.`;
 }
 
-/* ---------- TABLE : composition ---------- */
-function compoRow(n){return DATA.table.find(x=>x.n===n);}
-function renderCompo(n){
-  const r=compoRow(n);if(!r)return;
-  const malf=r.comp>0?`1 Coupable + ${r.comp} Complice${r.comp>1?'s':''}`:'1 Coupable';
-  let h=`<div class="card"><h3 class="sub">Répartition des camps</h3>
-    <p><span class="pill">🕵️ ${r.enq} Enquêteurs</span> <span class="pill">🩸 ${malf}</span> <span class="pill">🎭 ${r.intr} Intrigant${r.intr>1?'s':''}</span></p>
-    <p><span class="pill">⏳ ${r.tours} tours</span> <span class="pill">⚖️ ${r.actes} Actes d'accusation</span></p>`;
-  if(r.carte!=='—'){
-    const s=r.carte==='Complaisance'?"à un <b>Complice</b> (condamnation plus dure)":"à un <b>Enquêteur</b> (condamnation plus facile)";
-    h+=`<div class="tip"><b>Carte d'équilibrage : ${r.carte}</b> — donnée ${s}, via un signe secret.</div>`;
+/* ============ PARTIE : génération complète ============ */
+function initPartie(){
+  const selN = $('#autoN'); DATA.table.forEach(t => selN.appendChild(new Option(t.n + ' joueurs', t.n)));
+  $('#autoGen').onclick = () => { const seed = (Math.random() * 1e9) | 0; const n = +$('#autoN').value || 0; const diff = $('#diff').value; genererPartie(seed, n, diff); };
+  // scénarios
+  const sb = $('#scenBtns');
+  DATA.scenarios.forEach(s => { const b = el('button', 'ghost', `${esc(s.titre)} <span class="muted">(${s.joueurs})</span>`); b.onclick = () => chargerScenario(s); sb.appendChild(b); });
+  initCercleSurMesure();
+}
+
+function pickN(n, rng){ if (n) return n; const opts = DATA.table.map(t => t.n); return opts[Math.floor(rng() * opts.length)]; }
+
+function genererPartie(seed, nWanted, diff){
+  const rng = mulberry32(seed);
+  const n = pickN(nWanted, rng);
+  const t = DATA.table.find(x => x.n === n);
+  // présents : on tire n personnages qui contiennent AU MOINS un Cercle isolé
+  let present = null, cercle = null;
+  for (let attempt = 0; attempt < 60 && !cercle; attempt++){
+    present = shuffle(DATA.cast.map(c => c.num), rng).slice(0, n);
+    const cs = cerclesValides(present, rng);
+    if (cs.length) cercle = cs[0];
   }
-  if(n<=12)h+=`<div class="tip">🐦 <b>Table conseillée pour débuter :</b> activez <b>Le Corbeau</b> (un joueur tournant colporte une rumeur chaque tour) — il garantit la circulation de l'info et relève les chances des débutants.</div>`;
-  h+='</div>';$('compo').innerHTML=h;
-}
-
-/* ---------- GÉNÉRATEUR DE PARTIE ---------- */
-const VICTIMES=["Lord Ashcombe, le patriarche","Lady Ashcombe, la douairière","le vieux notaire Fairfax",
-  "un invité de marque","le maître de maison","l'oncle fortuné venu de l'étranger","la riche veuve du domaine"];
-const ARMES=["le poison dans le cognac","une chute dans le grand escalier","un coup porté dans l'ombre",
-  "l'étouffement dans le cabinet","une lame dissimulée","une dose de trop"];
-function genPartie(seed,forcedN){
-  const rng=mulberry32(seed);
-  const sizes=DATA.table.map(t=>t.n);
-  const n=forcedN||sizes[Math.floor(rng()*sizes.length)];
-  const r=compoRow(n);
-  // roster + Cercle
-  let present=null,valides=null;
-  for(let att=0;att<40;att++){
-    present=shuffle(DATA.cast.map(c=>c.num),rng).slice(0,n);
-    valides=cerclesValides(present);
-    if(valides.length)break;
+  if (!cercle){ // repli : garantir un Cercle en forçant le premier scénario connu
+    const s = DATA.scenarios[0]; cercle = s.cercle.slice();
+    present = cercle.concat(shuffle(DATA.cast.map(c => c.num).filter(x => !cercle.includes(x)), rng).slice(0, n - 3));
   }
-  if(!valides||!valides.length)return null;
-  const pick=valides[Math.floor(rng()*valides.length)];
-  const cercle=pick.trio;
-  const coupable=cercle[Math.floor(rng()*3)];
-  const leurres=cercle.filter(x=>x!==coupable);
-  const rest=shuffle(present.filter(x=>!cercle.includes(x)),rng);
-  const complices=rest.slice(0,r.comp);
-  // intrigants : un leurre peut l'être + des présents restants
-  const poolIntr=shuffle(present.filter(x=>x!==coupable&&!complices.includes(x)),rng);
-  const intrigants=poolIntr.slice(0,r.intr);
-  const enq=present.filter(x=>x!==coupable&&!complices.includes(x)&&!intrigants.includes(x));
-  const fp=fausse(present,cercle,Object.keys(pick.iso.vals));
-  return {seed,n,r,present,cercle,coupable,leurres,complices,intrigants,enq,iso:pick.iso,fp,
-    victime:VICTIMES[Math.floor(rng()*VICTIMES.length)],arme:ARMES[Math.floor(rng()*ARMES.length)]};
-}
-function renderPartie(g){
-  const malf=g.r.comp>0?`1 Coupable + ${g.r.comp} Complice(s)`:'1 Coupable';
-  let h=`<div class="brief"><h2 class="sec" style="margin-top:0">Partie générée — ${g.n} joueurs</h2>`;
-  h+=`<p><i>Un crime à Ravenswood : <b>${g.victime}</b> a péri — ${g.arme}. La tempête isole le manoir ; l'un des convives a frappé.</i></p>`;
-  h+=`<p><span class="pill">🕵️ ${g.r.enq} Enq.</span> <span class="pill">🩸 ${malf}</span> <span class="pill">🎭 ${g.r.intr} Intr.</span> <span class="pill">⏳ ${g.r.tours} tours</span> <span class="pill">⚖️ ${g.r.actes} Actes</span>${g.r.carte!=='—'?' <span class="pill">⚖️ '+g.r.carte+'</span>':''}</p>`;
-  h+=cercleBlock(g.coupable,g.leurres,g.iso);
-  if(g.fp){h+=`<div class="card"><h3 class="sub">Fausse piste à glisser</h3><p>🔴 « ${phrase(g.fp.d,g.fp.v)} » — partagée par ${g.fp.membres.map(surnom).join(', ')} (dont un leurre), <b>jamais</b> le Coupable.</p></div>`;}
-  h+=`<div class="card"><h3 class="sub">Distribution des rôles</h3>
-    <p><b class="ox">Coupable</b> : ${nom(g.coupable)}</p>
-    <p><b>Complices</b> : ${g.complices.length?g.complices.map(nom).join(' · '):'—'}</p>
-    <p><b>Intrigants</b> : ${g.intrigants.length?g.intrigants.map(n=>surnom(n)).join(' · '):'—'}</p>
-    <p><b>Enquêteurs</b> : ${g.enq.map(n=>'#'+n+' '+surnom(n)).join(' · ')}</p></div>`;
-  h+=`<div class="seedbar"><span class="muted">Graine :</span> <code>${g.seed}-${g.n}</code>
-     <button class="ghost" id="copyBrief">📋 Copier le brief</button>
-     <button class="ghost" id="shareBrief">🔗 Lien partageable</button>
-     <button class="ghost" id="printBrief">🖨 Imprimer</button></div></div>`;
-  return h;
-}
-function briefText(g){
-  const L=[];L.push(`L'HEURE DU CRIME — Partie générée (${g.n} joueurs, graine ${g.seed}-${g.n})`);
-  L.push(`Victime (PNJ) : ${g.victime} — ${g.arme}.`);
-  L.push(`Camps : ${g.r.enq} Enquêteurs · ${g.r.comp>0?'1 Coupable + '+g.r.comp+' Complice(s)':'1 Coupable'} · ${g.r.intr} Intrigant(s) · ${g.r.tours} tours · ${g.r.actes} Actes${g.r.carte!=='—'?' · carte '+g.r.carte:''}.`);
-  L.push(`\nCERCLE : Coupable = ${nom(g.coupable)}. Leurres = ${g.leurres.map(nom).join(', ')}.`);
-  L.push(`Indices-vérité : ${Object.entries(g.iso.vals).map(([d,v])=>phrase(d,v)).join(' ')}`);
-  if(g.fp)L.push(`Fausse piste : ${phrase(g.fp.d,g.fp.v)} (dont un leurre, pas le Coupable).`);
-  L.push(`Secrets : Coupable = accablant (aucune décharge). ${g.leurres.map(l=>surnom(l)+' = Secret « '+BYNUM[l].rumeur_decharge+' »').join(' ; ')}.`);
-  L.push(`\nRôles : Complices = ${g.complices.map(nom).join(', ')||'—'} ; Intrigants = ${g.intrigants.map(surnom).join(', ')||'—'} ; Enquêteurs = ${g.enq.map(surnom).join(', ')}.`);
-  return L.join('\n');
-}
-let CURGAME=null;
-function doGen(seed,n){
-  seed=seed||(Math.floor(Math.random()*1e9));
-  const g=genPartie(seed>>>0,n||0);
-  if(!g){$('autoOut').innerHTML='<div class="warn">Génération impossible, réessayez.</div>';return;}
-  CURGAME=g;$('autoOut').innerHTML=renderPartie(g);
-  try{history.replaceState(null,'','#g='+g.seed+'-'+g.n);}catch(e){}
-  $('copyBrief').onclick=()=>{navigator.clipboard.writeText(briefText(g));$('copyBrief').textContent='✓ Copié';setTimeout(()=>$('copyBrief').textContent='📋 Copier le brief',1500);};
-  $('shareBrief').onclick=()=>{const u=location.origin+location.pathname+'#g='+g.seed+'-'+g.n;navigator.clipboard.writeText(u);$('shareBrief').textContent='✓ Lien copié';setTimeout(()=>$('shareBrief').textContent='🔗 Lien partageable',1500);};
-  $('printBrief').onclick=()=>window.print();
+  const rngC = mulberry32(seed ^ 0x9e3779b9);
+  const coupable = cercle[Math.floor(rngC() * 3)];
+  const leurres = cercle.filter(x => x !== coupable);
+  const iso = sharedTraits(cercle, present);
+  // autres camps hors Cercle
+  const rest = shuffle(present.filter(x => !cercle.includes(x)), rng);
+  const complices = rest.slice(0, t.comp);
+  const intrigants = rest.slice(t.comp, t.comp + t.intr);
+  const enq = rest.slice(t.comp + t.intr);
+  // fausse piste : un trait neutre qui pointe un innocent hors Cercle (leurre public)
+  let fp = null;
+  for (const d of shuffle(NEUTRAL, rng)){
+    const cand = enq.find(p => iso.every(([dd]) => dd !== d));
+    if (cand){ fp = [d, BYNUM[cand].pub[d], cand]; break; }
+  }
+  const [vNom, vMort] = VICTIMES[Math.floor(rng() * VICTIMES.length)];
+  const g = {
+    id: seed + '-' + n, name: 'Partie ' + n + 'j', seed, n, diff,
+    present, cercle, coupable, leurres, iso, fp,
+    complices, intrigants, enq,
+    victime: vNom, mort: vMort,
+    mobile: MOBILES[Math.floor(rng() * MOBILES.length)],
+    redh: leurres.map(() => REDH[Math.floor(rng() * REDH.length)]),
+    corbeau: n <= 12,
+    acts: t.actes, tour: 1, ouverture: [], clues: [], journal: [],
+  };
+  assignerRoles(g, mulberry32(seed ^ 0x1234abcd));
+  batirIndices(g);
+  CURGAME = g; persistCur();
+  renderBrief(g); renderDashboard(); renderRoles();
+  location.hash = '';
 }
 
-/* ---------- CERCLE sur mesure ---------- */
-function selected(){return[...document.querySelectorAll('#castGrid input:checked')].map(i=>+i.value);}
-function updateSel(){$('selCount').textContent=selected().length;}
-function setSelection(nums){document.querySelectorAll('#castGrid input').forEach(i=>i.checked=nums.includes(+i.value));updateSel();}
-function buildGrid(){
-  const g=$('castGrid');g.innerHTML='';
-  DATA.cast.forEach(c=>{const l=document.createElement('label');l.className='chk';
-    l.innerHTML=`<input type="checkbox" value="${c.num}"> <span>#${c.num} ${surnom(c.num)} <span class="muted">(${c.genre})</span></span>`;g.appendChild(l);});
-  g.addEventListener('change',updateSel);
-}
-function genCercle(){
-  const present=selected(),out=$('cercleOut');
-  if(present.length<8){out.innerHTML='<div class="warn">Cochez au moins 8 personnages présents.</div>';return;}
-  const v=cerclesValides(present);
-  if(!v.length){out.innerHTML='<div class="warn">Aucun Cercle-3 isolant. Ajoutez ou variez les personnages.</div>';return;}
-  const p=v[Math.floor(Math.random()*v.length)],trio=p.trio,coup=trio[Math.floor(Math.random()*3)];
-  out.innerHTML=cercleBlock(coup,trio.filter(x=>x!==coup),p.iso)+
-    `<div class="rowflex"><button class="ghost" id="regen">↻ Autre Cercle</button><span class="muted">${v.length} Cercle(s) possible(s)</span></div>`;
-  $('regen').onclick=genCercle;
-}
-function loadScenario(sc){
-  const iso={combo:sc.traits.map(t=>t[0]),vals:Object.fromEntries(sc.traits.map(t=>[t[0],t[1]]))};
-  const leurres=sc.cercle.filter(x=>x!==sc.coupable);
-  $('cercleOut').innerHTML=`<h2 class="sec">Scénario ${sc.id} — « ${sc.titre} » <span class="muted" style="font-size:14px">(${sc.joueurs} j.)</span></h2>`+
-    cercleBlock(sc.coupable,leurres,iso)+
-    `<div class="card"><h3 class="sub">Rôles</h3><p><b>Complices</b> : ${sc.complices.map(nom).join(' · ')}</p>
-     <p><b>Intrigants</b> : ${sc.intrigants.map(surnom).join(' · ')}</p>
-     <p><b>Enquêteurs</b> : ${sc.enq.map(n=>'#'+n).join(' · ')}</p>
-     <p class="muted" style="font-size:13px">Victime (PNJ) : ${sc.victime}.</p></div>`;
-  $('cercleOut').scrollIntoView({behavior:'smooth'});
-}
-
-/* ---------- SON : carillon Web Audio ---------- */
-let AC=null;
-function bell(freq,t0,dur){
-  const o=AC.createOscillator(),g=AC.createGain();
-  o.type='triangle';o.frequency.value=freq;
-  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(.35,t0+.01);
-  g.gain.exponentialRampToValueAtTime(.0008,t0+dur);
-  o.connect(g);g.connect(AC.destination);o.start(t0);o.stop(t0+dur);
-}
-function carillon(){
-  if(!store.sound)return;
-  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
-    const t=AC.currentTime;[[880,0],[660,.28],[990,.56],[587,.9]].forEach(([f,d])=>bell(f,t+d,1.6));
-  }catch(e){}
-}
-
-/* ---------- HORLOGE ---------- */
-const clk={remain:600,dur:600,running:false,phase:0,phases:[{n:'Audience',m:10},{n:'Investigation',m:15},{n:'Délibéré',m:5}],iv:null};
-function fmt(s){const m=Math.floor(s/60),ss=s%60;return m+':'+String(ss).padStart(2,'0');}
-function drawClock(){
-  const el=$('timer');el.textContent=fmt(Math.max(0,clk.remain));
-  el.classList.toggle('low',clk.remain<=30&&clk.remain>0);
-  el.classList.toggle('ring',clk.remain===0);
-}
-function setPhase(m,name,idx){clk.dur=m*60;clk.remain=m*60;if(name)$('phaseName').textContent=name;if(idx!=null)clk.phase=idx;stopClock();drawClock();
-  document.querySelectorAll('#phaseBtns button').forEach(b=>b.classList.toggle('sel',+b.dataset.min===m&&b.dataset.name===name));}
-function tick(){if(clk.remain>0){clk.remain--;drawClock();if(clk.remain===0)chime();}}
-function startClock(){if(clk.running)return;if(clk.remain<=0)return;clk.running=true;$('startBtn').textContent='⏸ Pause';clk.iv=setInterval(tick,1000);}
-function stopClock(){clk.running=false;if($('startBtn'))$('startBtn').textContent='▶ Démarrer';if(clk.iv)clearInterval(clk.iv);}
-function chime(){stopClock();carillon();const c=$('chime');c.classList.remove('on');void c.offsetWidth;c.classList.add('on');drawClock();}
-
-/* ---------- CONDUITE : compteurs + persistance ---------- */
-function counter(valId,minId,plusId,min,max,key){
-  const el=$(valId);el.textContent=store[key];
-  const set=x=>{store[key]=Math.max(min,Math.min(max,x));el.textContent=store[key];save();};
-  $(minId).onclick=()=>set(store[key]-1);$(plusId).onclick=()=>set(store[key]+1);
-}
-function renderClues(){
-  const ul=$('clueList');ul.innerHTML='';
-  store.clues.forEach((c,i)=>{const li=document.createElement('li');li.textContent=c;
-    li.onclick=()=>{store.clues.splice(i,1);save();renderClues();};ul.appendChild(li);});
-}
-
-/* ---------- THÈME / SON ---------- */
-function applyTheme(){document.documentElement.setAttribute('data-theme',store.theme);
-  $('themeBtn').textContent=store.theme==='night'?'☀':'☾';
-  document.querySelector('meta[name=theme-color]').setAttribute('content',store.theme==='night'?'#141019':'#6e222b');}
-function applySound(){$('soundBtn').textContent=store.sound?'🔔':'🔕';}
-
-/* ---------- INIT ---------- */
-function init(){
-  load();applyTheme();applySound();
-  // tabs
-  document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{
-    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('section.panel').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');$(b.dataset.tab).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});
+function assignerRoles(g, rng){
+  const players = [];
+  players.push({ num: g.coupable, camp: 'malf', role: 'coupable', atout: 'Le Coupable' });
+  // complices
+  const compPool = g.diff === 'adv' ? shuffle(PERT.concat(['Le Bouc émissaire']), rng) : shuffle(MALF_DEF.concat(['Le Corrupteur']), rng);
+  g.complices.forEach((num, i) => players.push({ num, camp: 'malf', role: 'complice', atout: i === 0 ? 'Le Complice' : (compPool[i % compPool.length]) }));
+  // intrigants → objectifs
+  const objs = shuffle(DATA.atouts.filter(a => a.camp === 'intr').map(a => a.nom), rng);
+  g.intrigants.forEach((num, i) => players.push({ num, camp: 'intr', role: 'intrigant', atout: objs[i % objs.length] }));
+  // enquêteurs : plancher d'info + Fouineur & Confesseur garantis
+  const must = ['Le Fouineur', 'Le Confesseur'];
+  let atts = must.filter((_, i) => i < g.enq.length).slice();
+  const pool = shuffle(INFO.concat(ANTIPERT, g.diff === 'deb' ? PROTECT : []).filter(x => !must.includes(x)), rng);
+  let pi = 0; while (atts.length < g.enq.length){ atts.push(pool[pi % pool.length]); pi++; }
+  atts = shuffle(atts, rng);
+  g.enq.forEach((num, i) => players.push({ num, camp: 'enq', role: 'enqueteur', atout: atts[i] }));
+  // notes de Secret
+  players.forEach(p => {
+    if (p.role === 'coupable') p.secret = 'Secret ACCABLANT — deux faits à charge, aucune décharge.';
+    else if (g.leurres.includes(p.num)) p.secret = 'Secret contenant « ' + (BYNUM[p.num].rumeur_decharge || '…') + " » (sa décharge, vraie — elle le blanchit).";
+    else p.secret = 'Un Secret quelconque du vivier.';
+    p.distribue = false;
   });
-  // toggles
-  $('themeBtn').onclick=()=>{store.theme=store.theme==='night'?'day':'night';applyTheme();save();};
-  $('soundBtn').onclick=()=>{store.sound=!store.sound;applySound();save();if(store.sound)carillon();};
-  // table
-  const sel=$('npl');for(let n=8;n<=20;n++){const o=document.createElement('option');o.value=n;o.textContent=n;if(n===12)o.selected=true;sel.appendChild(o);}
-  const an=$('autoN');DATA.table.forEach(t=>{const o=document.createElement('option');o.value=t.n;o.textContent=t.n+' joueurs';an.appendChild(o);});
-  sel.onchange=()=>renderCompo(+sel.value);renderCompo(12);
-  // générateur
-  $('autoGen').onclick=()=>doGen(null,+$('autoN').value);
-  buildGrid();$('genCercle').onclick=genCercle;
-  $('selClear').onclick=()=>setSelection([]);
-  $('selDefault').onclick=()=>setSelection([1,2,3,4,6,10,12,13,15,24,26,28,29,31]);
-  const sb=$('scenBtns');DATA.scenarios.forEach(s=>{const btn=document.createElement('button');btn.className='act';
-    btn.innerHTML=`Scénario ${s.id} <span style="font-weight:400">· ${s.joueurs} j.</span>`;btn.onclick=()=>loadScenario(s);sb.appendChild(btn);});
-  // horloge
-  drawClock();$('phaseName').textContent=clk.phases[0].n;
-  document.querySelectorAll('#phaseBtns button').forEach((b,i)=>b.onclick=()=>setPhase(+b.dataset.min,b.dataset.name,i));
-  $('setCustom').onclick=()=>{const m=Math.max(1,Math.min(60,+$('customMin').value||10));setPhase(m,'Minuteur');};
-  $('startBtn').onclick=()=>{if(!AC&&store.sound){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}clk.running?stopClock():startClock();};
-  $('resetBtn').onclick=()=>{clk.remain=clk.dur;stopClock();drawClock();};
-  $('minus1').onclick=()=>{clk.remain=Math.max(0,clk.remain-60);drawClock();};
-  $('plus1').onclick=()=>{clk.remain+=60;drawClock();};
-  $('nextPhase').onclick=()=>{clk.phase=(clk.phase+1)%clk.phases.length;const p=clk.phases[clk.phase];setPhase(p.m,p.n,clk.phase);};
-  // conduite
-  counter('actVal','actMinus','actPlus',0,3,'acts');
-  counter('tourVal','tourMinus','tourPlus',1,6,'tour');
-  const ouv=document.querySelectorAll('#ouverture li');
-  ouv.forEach((li,i)=>{if(store.ouverture[i])li.classList.add('done');
-    li.onclick=()=>{li.classList.toggle('done');store.ouverture[i]=li.classList.contains('done');save();};});
-  $('addClue').onclick=()=>{const v=$('clueInput').value.trim();if(v){store.clues.push(v);$('clueInput').value='';save();renderClues();}};
-  $('clueInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('addClue').click();});
-  renderClues();
-  $('resetSession').onclick=()=>{if(confirm('Nouvelle partie : remettre à zéro les compteurs, l\'ouverture et le mur d\'enquête ?')){
-    store.acts=2;store.tour=1;store.ouverture=[];store.clues=[];save();
-    $('actVal').textContent=2;$('tourVal').textContent=1;ouv.forEach(li=>li.classList.remove('done'));renderClues();}};
-  // deep link (#g=seed-n)
-  const m=location.hash.match(/g=(\d+)-(\d+)/);
-  if(m){$('autoN').value=m[2];doGen(+m[1],+m[2]);
-    document.querySelector('nav.tabs button[data-tab="generateur"]').click();}
+  players.sort((a, b) => g.present.indexOf(a.num) - g.present.indexOf(b.num));
+  g.players = players;
 }
 
-fetch('data.json').then(r=>r.json()).then(d=>{DATA=d;BYNUM=Object.fromEntries(d.cast.map(c=>[c.num,c]));init();})
-  .catch(e=>{document.querySelector('main').innerHTML='<div class="warn">Erreur de chargement ('+e+').</div>';});
+function batirIndices(g){
+  const T = [];
+  const [d1, v1] = g.iso[0] || ['signe', '—'];
+  const [d2, v2] = g.iso[1] || g.iso[0] || ['main', '—'];
+  T.push({ tour: 1, items: [{ k: 'vrai', t: indiceTxt(d1, v1) }, g.fp ? { k: 'faux', t: 'Fausse piste : ' + indiceTxt(g.fp[0], g.fp[1]) + ' (mène à ' + nomCourt(g.fp[2]) + ', innocent).' } : null].filter(Boolean) });
+  T.push({ tour: 2, items: [{ k: 'vrai', t: indiceTxt(d2, v2) }, { k: 'mobile', t: 'Le mobile affleure : ' + g.mobile + '.' }] });
+  T.push({ tour: 3, items: [{ k: 'mobile', t: 'Un témoin recoupe le mobile : ' + g.mobile + ' — cela vise ' + nomCourt(g.coupable) + '.' }] });
+  T.push({ tour: 4, items: [{ k: 'fantome', t: '👻 Dernier indice du Fantôme (après le 2ᵉ meurtre) : il désigne ' + nomCourt(g.coupable) + '.' }] });
+  g.indices = T;
+}
+const nomCourt = num => { const c = BYNUM[num]; if (!c) return '#' + num; const p = c.nom.split(' '); return '#' + num + ' ' + p[p.length - 1]; };
+const initiales = num => { const c = BYNUM[num]; if (!c) return '?'; const p = c.nom.replace(/^(Lord|Lady|Sir|Mme|M\.|Dr|Le|La|Miss|Colonel)\s+/i, '').split(' '); return (p[0][0] + (p[p.length - 1][0] || '')).toUpperCase(); };
+
+/* ---------- rendu Brief (onglet Partie) ---------- */
+function renderBrief(g){
+  const out = $('#autoOut'); if (!g){ out.innerHTML = ''; return; }
+  const camps = c => c === 'enq' ? 'enq' : c === 'intr' ? 'intr' : 'malf';
+  const suspLine = num => `<span class="tag ${num === g.coupable ? 'coup' : 'malf'}">${num === g.coupable ? 'Coupable' : 'Leurre'}</span> ${esc(BYNUM[num].nom)} <span class="muted">(${nomCourt(num)})</span>`;
+  const indicesHtml = g.indices.map(tt => `<li><b>Tour ${tt.tour}${tt.tour === 4 ? ' (Fantôme)' : ''} :</b><ul>${tt.items.map(it => `<li class="ind-${it.k}">${esc(it.t)}</li>`).join('')}</ul></li>`).join('');
+  const isoHtml = g.iso.map(([d, v]) => `${LABELS[d]} = <b>${esc(v)}</b>`).join(' · ');
+  out.innerHTML = `
+    <div class="brief">
+      <div class="seedbar">
+        <span class="muted">Graine <code>${g.seed}</code> · ${g.n} joueurs · ${diffLabel(g.diff)}</span>
+        <span class="seedbar-btns">
+          <button class="ghost" id="briefSave">💾 Enregistrer</button>
+          <button class="ghost" id="briefCopy">⧉ Copier le brief</button>
+          <button class="ghost" id="briefPlay">▶ Mener cette partie</button>
+        </span>
+      </div>
+      <div class="card">
+        <h3 class="fic">La scène</h3>
+        <p><b>${esc(g.victime)}</b>, ${esc(g.mort)}. Trois suspects émergent — un seul a frappé.</p>
+        <p class="muted">Cercle isolé par : ${isoHtml}</p>
+      </div>
+      <div class="card">
+        <h3 class="fic">Le Cercle des trois</h3>
+        <div>${g.cercle.map(num => `<div class="prow"><div class="avatar ${num === g.coupable ? 'coup' : ''}">${initiales(num)}</div><div class="who">${suspLine(num)}</div></div>`).join('')}</div>
+        <p class="tip">Mobile du Coupable : <b>${esc(g.mobile)}</b>.</p>
+      </div>
+      <div class="card">
+        <h3 class="fic">Distiller les indices</h3>
+        <ul class="indices">${indicesHtml}</ul>
+        <p class="tip">Les indices « vrai » resserrent le Cercle ; la « fausse piste » égare vers un innocent ; le « mobile » désigne le Coupable au fil des tours.</p>
+      </div>
+      <div class="card">
+        <h3 class="fic">Les autres camps</h3>
+        <p><b>Complices (${g.complices.length}) :</b> ${g.complices.map(nomCourt).map(esc).join(', ') || '—'} — ${esc(COMP_WHY[g.seed % COMP_WHY.length])}.</p>
+        <p><b>Intrigants (${g.intrigants.length}) :</b> ${g.intrigants.map(nomCourt).map(esc).join(', ') || '—'} — chacun poursuit son Objectif secret.</p>
+        <p><b>Enquêteurs :</b> ${g.enq.length} — voir l'onglet <b>Rôles</b> pour la distribution des Atouts et Secrets.</p>
+      </div>
+    </div>`;
+  $('#briefSave').onclick = () => saveToLib(g);
+  $('#briefCopy').onclick = () => copyBrief(g);
+  $('#briefPlay').onclick = () => { CURGAME = g; persistCur(); renderDashboard(); goTab('enjeu'); };
+}
+const diffLabel = d => ({ deb: 'Débutant', int: 'Intermédiaire', adv: 'Avancé' }[d] || d);
+
+function copyBrief(g){
+  const L = [];
+  L.push(`L'HEURE DU CRIME — brief MJ (graine ${g.seed}, ${g.n} joueurs, ${diffLabel(g.diff)})`);
+  L.push(`Victime : ${g.victime}, ${g.mort}.`);
+  L.push(`Cercle : ${g.cercle.map(nomCourt).join(', ')} — isolé par ${g.iso.map(([d, v]) => LABELS[d] + '=' + v).join(' + ')}.`);
+  L.push(`COUPABLE : ${nomCourt(g.coupable)} — mobile : ${g.mobile}.`);
+  L.push(`Leurres : ${g.leurres.map(nomCourt).join(', ')}.`);
+  L.push('Indices :');
+  g.indices.forEach(tt => tt.items.forEach(it => L.push(`  T${tt.tour} [${it.k}] ${it.t}`)));
+  L.push(`Complices : ${g.complices.map(nomCourt).join(', ') || '—'}`);
+  L.push(`Intrigants : ${g.intrigants.map(nomCourt).join(', ') || '—'}`);
+  L.push('Rôles/Atouts :');
+  g.players.forEach(p => L.push(`  ${nomCourt(p.num)} · ${p.camp} · ${p.atout} · ${p.secret}`));
+  navigator.clipboard.writeText(L.join('\n')).then(() => toast('Brief copié dans le presse-papiers.'));
+}
+
+/* ============ bibliothèque ============ */
+function saveToLib(g){
+  const name = prompt('Nom de la partie à enregistrer :', g.name + ' — ' + diffLabel(g.diff));
+  if (name == null) return;
+  g = JSON.parse(JSON.stringify(g)); g.name = name || g.name; g.savedAt = Date.now();
+  LIB = LIB.filter(x => x.seed !== g.seed || x.n !== g.n); LIB.unshift(g);
+  persistLib(); renderLibrary(); toast('Partie enregistrée.');
+}
+function renderLibrary(){
+  const box = $('#library'); if (!box) return;
+  if (!LIB.length){ box.innerHTML = '<p class="empty">Aucune partie enregistrée. Générez puis « Enregistrer ».</p>'; return; }
+  box.innerHTML = '';
+  LIB.forEach((g, i) => {
+    const it = el('div', 'lib-item');
+    it.innerHTML = `<div class="name">${esc(g.name)}<div class="muted" style="font-size:12px">${g.n} j · ${diffLabel(g.diff)} · graine ${g.seed}</div></div>
+      <button class="ghost" data-a="load">Charger</button><button class="ghost" data-a="dup">Dupliquer</button><button class="ghost" data-a="del">✕</button>`;
+    it.querySelector('[data-a="load"]').onclick = () => { CURGAME = JSON.parse(JSON.stringify(g)); persistCur(); renderBrief(CURGAME); renderDashboard(); renderRoles(); goTab('partie'); toast('Partie chargée.'); };
+    it.querySelector('[data-a="dup"]').onclick = () => { genererPartie((Math.random() * 1e9) | 0, g.n, g.diff); toast('Nouvelle variante générée.'); };
+    it.querySelector('[data-a="del"]').onclick = () => { if (confirm('Supprimer « ' + g.name + ' » ?')){ LIB.splice(i, 1); persistLib(); renderLibrary(); } };
+    box.appendChild(it);
+  });
+}
+
+/* ============ scénarios d'initiation ============ */
+function chargerScenario(s){
+  const present = s.cercle.concat(s.complices, s.intrigants, s.enq);
+  const g = {
+    id: 'scen-' + s.id, name: s.titre, seed: 'S' + s.id, n: present.length, diff: 'deb',
+    present, cercle: s.cercle.slice(), coupable: s.coupable, leurres: s.cercle.filter(x => x !== s.coupable),
+    iso: s.traits.slice(), fp: null, complices: s.complices.slice(), intrigants: s.intrigants.slice(), enq: s.enq.slice(),
+    victime: s.victime.split('(')[0].trim(), mort: (s.victime.match(/\(([^)]+)\)/) || [, 'assassiné'])[1],
+    mobile: MOBILES[s.id.charCodeAt(0) % MOBILES.length], redh: [], corbeau: true,
+    acts: 2, tour: 1, ouverture: [], clues: [], journal: [], scenario: true,
+  };
+  assignerRoles(g, mulberry32(s.id.charCodeAt(0) * 7919));
+  batirIndices(g);
+  CURGAME = g; persistCur(); renderBrief(g); renderDashboard(); renderRoles();
+  $('#autoOut').scrollIntoView({ behavior: 'smooth' }); toast('Scénario « ' + s.titre + ' » chargé.');
+}
+
+/* ============ Cercle sur mesure ============ */
+function initCercleSurMesure(){
+  const grid = $('#castGrid');
+  DATA.cast.forEach(c => {
+    const b = el('button', 'chip'); b.dataset.num = c.num;
+    b.innerHTML = `<b>${nomCourt(c.num)}</b><span>${esc(c.role)}</span>`;
+    b.onclick = () => { b.classList.toggle('on'); updCount(); };
+    grid.appendChild(b);
+  });
+  $('#selDefault').onclick = () => { const def = DATA.scenarios[0]; const set = new Set(def.cercle.concat(def.complices, def.intrigants, def.enq)); $$('#castGrid .chip').forEach(b => b.classList.toggle('on', set.has(+b.dataset.num))); updCount(); };
+  $('#selClear').onclick = () => { $$('#castGrid .chip').forEach(b => b.classList.remove('on')); updCount(); };
+  $('#genCercle').onclick = trouverCercle;
+  updCount();
+}
+const selNums = () => $$('#castGrid .chip.on').map(b => +b.dataset.num);
+function updCount(){ $('#selCount').textContent = selNums().length; }
+function trouverCercle(){
+  const present = selNums(); const out = $('#cercleOut');
+  if (present.length < 6){ out.innerHTML = '<p class="warn">Cochez au moins 6 présents.</p>'; return; }
+  const cs = cerclesValides(present, mulberry32((Math.random() * 1e9) | 0));
+  if (!cs.length){ out.innerHTML = '<p class="warn">Aucun Cercle isolable avec ces présents. Modifiez la sélection.</p>'; return; }
+  const trio = cs[0], iso = sharedTraits(trio, present);
+  out.innerHTML = `<div class="card"><h3 class="fic">Cercle trouvé</h3>
+    <div>${trio.map(num => `<div class="prow"><div class="avatar">${initiales(num)}</div><div class="who"><b>${esc(BYNUM[num].nom)}</b><div class="r">${esc(BYNUM[num].role)}</div></div></div>`).join('')}</div>
+    <p>Isolé par : ${iso.map(([d, v]) => `${LABELS[d]} = <b>${esc(v)}</b>`).join(' · ')}</p>
+    <p class="muted">${cs.length} Cercle(s) possible(s) au total. Désignez librement le Coupable parmi les trois.</p></div>`;
+}
+
+/* ============ EN JEU : tableau de bord ============ */
+const OUVERTURE = [
+  'Distribuer perso, Atout et 2 Rumeurs à chacun', 'Distribuer une carte Secret par joueur',
+  'Placer la victime, annoncer le crime', 'Lire l\'ambiance et lancer le 1ᵉʳ tour',
+];
+function renderDashboard(){
+  const box = $('#dashboard'); if (!box) return;
+  const g = CURGAME;
+  if (!g || !g.players){ box.innerHTML = `<div class="empty">Aucune partie en cours.<br><button class="act" style="margin-top:10px" onclick="document.querySelector('.tabs [data-tab=partie]').click()">Générer ou charger une partie</button></div>`; return; }
+  const vivants = g.present.length; // indicatif
+  box.innerHTML = `
+    <h2 class="sec">${esc(g.name)} <span class="muted" style="font-weight:400">· ${g.n} j · ${diffLabel(g.diff)}</span></h2>
+    <div class="dash-top">
+      <div class="dash-mini"><div class="k">Actes restants</div><div class="v" id="dActs">${g.acts}</div><div class="mini-ctl"><button data-a="act-">−</button><button data-a="act+">+</button></div></div>
+      <div class="dash-mini"><div class="k">Tour d'enquête</div><div class="v" id="dTour">${g.tour}</div><div class="mini-ctl"><button data-a="tour-">−</button><button data-a="tour+">+</button></div></div>
+    </div>
+    <div class="card">
+      <h3 class="fic">Rappel confidentiel</h3>
+      <p>Coupable : <b>${nomCourt(g.coupable)}</b> · Leurres : ${g.leurres.map(nomCourt).join(', ')}.</p>
+      <p class="muted">Mobile : ${esc(g.mobile)}.</p>
+    </div>
+    <div class="card">
+      <h3 class="fic">Cérémonie d'ouverture</h3>
+      <div id="ouvList"></div>
+    </div>
+    <div class="card">
+      <h3 class="fic">Le mur d'enquête</h3>
+      <div class="rowflex"><input id="clueIn" type="text" placeholder="Indice révélé / note publique" style="flex:1;min-width:160px"><button class="act" id="clueAdd">Épingler</button></div>
+      <div id="wallList"></div>
+      <div class="rowflex" style="margin-top:6px">
+        <button class="ghost" id="nextClue">Indice du tour ${g.tour}</button>
+        <button class="ghost" id="projFromDash">⛶ Projeter le mur</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3 class="fic">Aide au vote</h3>
+      <div class="rowflex"><label>Votants vivants : <input id="voteN" type="number" min="2" max="20" value="${vivants}" style="width:70px"></label><button class="ghost" id="voteCalc">Majorité ?</button><span id="voteOut" class="muted"></span></div>
+    </div>
+    <div class="card">
+      <h3 class="fic">Événements</h3>
+      <div class="rowflex">
+        <button class="ghost" id="ev2murder">🕯️ 2ᵉ meurtre (Fantôme)</button>
+        <button class="ghost" id="evAccuse">⚖️ Accusation portée</button>
+        <button class="ghost" id="evCarillon">🔔 Carillon</button>
+      </div>
+      <div id="journalOut" style="margin-top:8px"></div>
+    </div>
+    <div class="rowflex"><button class="ghost" id="resetSession">↻ Réinitialiser la session (Actes/Tour/Mur/Journal)</button></div>`;
+  // compteurs
+  box.querySelectorAll('.mini-ctl button').forEach(b => b.onclick = () => {
+    const a = b.dataset.a;
+    if (a === 'act-') g.acts = Math.max(0, g.acts - 1); if (a === 'act+') g.acts++;
+    if (a === 'tour-') g.tour = Math.max(1, g.tour - 1); if (a === 'tour+') g.tour++;
+    persistCur(); $('#dActs').textContent = g.acts; $('#dTour').textContent = g.tour; $('#nextClue') && ($('#nextClue').textContent = 'Indice du tour ' + g.tour);
+  });
+  renderOuverture(g); renderWall(g); renderJournal(g);
+  $('#clueAdd').onclick = () => { const v = $('#clueIn').value.trim(); if (v){ g.clues.push(v); $('#clueIn').value = ''; persistCur(); renderWall(g); } };
+  $('#nextClue').onclick = () => { const tt = g.indices.find(x => x.tour === g.tour); if (tt) tt.items.forEach(it => g.clues.push('[T' + g.tour + '] ' + it.t)); persistCur(); renderWall(g); };
+  $('#projFromDash').onclick = () => openProjection();
+  $('#voteCalc').onclick = () => { const n = +$('#voteN').value; const maj = Math.floor((n - 1) / 2) + 1; $('#voteOut').textContent = `Il faut ${maj} voix sur ${n - 1} (l'accusé·e ne vote pas). Égalité → pas d'arrestation.`; };
+  $('#ev2murder').onclick = () => { glas(); journal(g, '🕯️ Second meurtre — le Fantôme livrera son dernier indice.'); };
+  $('#evAccuse').onclick = () => { maillet(); g.acts = Math.max(0, g.acts - 1); persistCur(); $('#dActs').textContent = g.acts; journal(g, '⚖️ Accusation portée (un Acte consommé).'); };
+  $('#evCarillon').onclick = () => carillon();
+  $('#resetSession').onclick = () => { if (confirm('Réinitialiser la session en cours ?')){ g.acts = (DATA.table.find(t => t.n === g.n) || { actes: 2 }).actes; g.tour = 1; g.clues = []; g.journal = []; g.ouverture = []; persistCur(); renderDashboard(); } };
+}
+function renderOuverture(g){
+  const box = $('#ouvList'); if (!box) return; box.innerHTML = '';
+  OUVERTURE.forEach((step, i) => {
+    const lab = el('label', 'chk-row');
+    const done = g.ouverture.includes(i);
+    lab.innerHTML = `<input type="checkbox" ${done ? 'checked' : ''}> <span${done ? ' style="opacity:.5;text-decoration:line-through"' : ''}>${esc(step)}</span>`;
+    lab.querySelector('input').onchange = e => { if (e.target.checked) g.ouverture.push(i); else g.ouverture = g.ouverture.filter(x => x !== i); persistCur(); renderOuverture(g); };
+    box.appendChild(lab);
+  });
+}
+function renderWall(g){
+  const box = $('#wallList'); if (!box) return;
+  box.innerHTML = g.clues.length ? g.clues.map((c, i) => `<div class="billet">🔍 ${esc(c)} <button class="link-x" data-i="${i}">✕</button></div>`).join('') : '<p class="empty">Rien d\'épinglé.</p>';
+  box.querySelectorAll('.link-x').forEach(b => b.onclick = () => { g.clues.splice(+b.dataset.i, 1); persistCur(); renderWall(g); syncProjection(); });
+  syncProjection();
+}
+function journal(g, txt){ g.journal.unshift(new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + ' — ' + txt); persistCur(); renderJournal(g); }
+function renderJournal(g){ const box = $('#journalOut'); if (!box) return; box.innerHTML = g.journal.length ? g.journal.map(j => `<div class="muted" style="font-size:13px">${esc(j)}</div>`).join('') : '<p class="empty">Journal vide.</p>'; }
+
+/* ============ RÔLES : distribution ============ */
+function renderRoles(){
+  const box = $('#rolesOut'); if (!box) return; const g = CURGAME;
+  if (!g || !g.players){ box.innerHTML = `<div class="empty">Aucune partie en cours.<br><button class="act" style="margin-top:10px" onclick="document.querySelector('.tabs [data-tab=partie]').click()">Générer ou charger une partie</button></div>`; return; }
+  const n = g.players.filter(p => p.distribue).length;
+  box.innerHTML = `<h2 class="sec">Distribution des rôles <span class="muted" style="font-weight:400">· ${n}/${g.players.length} remis</span></h2>
+    <p class="muted">Cochez « remis » à mesure. Chaque joueur reçoit son personnage, son Atout et une note de Secret. Le <b>lien joueur</b> ouvre une fiche plein écran à tendre au joueur.</p>
+    <div id="roleRows"></div>
+    <div class="rowflex" style="margin-top:8px"><button class="ghost" id="rolesReset">Tout décocher</button></div>`;
+  const rows = $('#roleRows');
+  g.players.forEach((p, i) => {
+    const at = DATA.atouts.find(a => a.nom === p.atout);
+    const r = el('div', 'card'); r.style.padding = '10px 12px'; r.style.margin = '7px 0';
+    r.innerHTML = `<div class="prow" style="border:0;padding:0">
+        <div class="avatar ${p.role === 'coupable' ? 'coup' : ''}">${initiales(p.num)}</div>
+        <div class="who"><b>${esc(BYNUM[p.num].nom)}</b> <span class="tag ${p.camp === 'enq' ? 'enq' : p.camp === 'intr' ? 'intr' : p.role === 'coupable' ? 'coup' : 'malf'}">${p.role === 'coupable' ? 'Coupable' : p.role === 'complice' ? 'Complice' : p.role === 'intrigant' ? 'Intrigant' : 'Enquêteur'}</span>
+          <div class="r">Atout : <b>${esc(p.atout)}</b>${at ? ' · <span class="muted">' + esc(at.timing) + '</span>' : ''}</div></div>
+        <label class="dist-chk"><input type="checkbox" data-i="${i}" ${p.distribue ? 'checked' : ''}> remis</label></div>
+      <div class="muted" style="font-size:13px;margin-top:4px">${at ? '⚙️ ' + esc(at.effet) + '<br>' : ''}🗝️ ${esc(p.secret)}</div>
+      <div class="rowflex" style="margin-top:6px"><button class="ghost" data-link="${i}">🔗 Lien joueur</button></div>`;
+    r.querySelector('input').onchange = e => { p.distribue = e.target.checked; persistCur(); renderRoles(); };
+    r.querySelector('[data-link]').onclick = () => showPlayerCard(g, i);
+    rows.appendChild(r);
+  });
+  $('#rolesReset').onclick = () => { g.players.forEach(p => p.distribue = false); persistCur(); renderRoles(); };
+}
+
+/* ---------- fiche joueur plein écran ---------- */
+function showPlayerCard(g, idx){
+  const p = g.players[idx], c = BYNUM[p.num], at = DATA.atouts.find(a => a.nom === p.atout);
+  let ov = $('#playerCard'); if (!ov){ ov = el('div', 'projection'); ov.id = 'playerCard'; document.body.appendChild(ov); }
+  const pub = Object.keys(LABELS).map(d => `${LABELS[d]} : <b>${esc(c.pub[d])}</b>`).join(' · ');
+  ov.innerHTML = `<button class="proj-close" id="pcClose">✕</button>
+    <div style="max-width:640px;width:92%;text-align:center">
+      <div class="avatar" style="width:72px;height:72px;font-size:28px;margin:0 auto 10px">${initiales(p.num)}</div>
+      <h2 style="font-family:'Playfair Display',serif;color:#e6c96a;margin:.2em 0">${esc(c.nom)}</h2>
+      <p style="color:#c9a24a;font-style:italic">${esc(c.role)}</p>
+      <p style="margin:12px 0;color:#ecdcc0">${pub}</p>
+      <div style="border-top:1px solid rgba(201,162,74,.35);margin:14px 0;padding-top:12px">
+        <p style="color:#e6c96a;font-weight:700">Votre Atout : ${esc(p.atout)}</p>
+        ${at ? `<p style="color:#ecdcc0;font-size:15px">${esc(at.effet)}<br><span style="color:#c9a24a">Moment : ${esc(at.timing)}</span></p>` : ''}
+      </div>
+      <p style="color:#9a8f80;font-size:13px">Mémorisez, puis rendez cette fiche au Meneur.</p>
+    </div>`;
+  ov.classList.add('on'); $('#pcClose').onclick = () => ov.classList.remove('on');
+}
+
+/* ============ BOÎTE à requêtes ============ */
+const ORDRE = { Protection: 0, Perturbation: 1, Information: 2, Meurtre: 3 };
+function atoutTiming(nom){ const a = DATA.atouts.find(x => x.nom.toLowerCase() === (nom || '').toLowerCase().trim() || x.nom.toLowerCase().includes((nom || '').toLowerCase().trim())); return a; }
+let BILLETS = [];
+function initBoite(){
+  const dl = $('#atoutList'); DATA.atouts.forEach(a => dl.appendChild(new Option(a.nom)));
+  $('#addBillet').onclick = () => {
+    const num = $('#bNum').value.trim(), atxt = $('#bAtout').value.trim(), cible = $('#bCible').value.trim();
+    if (!atxt){ toast('Indiquez au moins un Atout.'); return; }
+    BILLETS.push({ num, atout: atxt, cible }); $('#bNum').value = $('#bAtout').value = $('#bCible').value = ''; renderBillets();
+  };
+  $('#resolve').onclick = renderBillets;
+  $('#clearBillets').onclick = () => { BILLETS = []; renderBillets(); };
+}
+function categorie(a){ if (!a) return 'Information'; if (PROTECT.includes(a.nom) || ANTIPERT.includes(a.nom)) return 'Protection'; if (PERT.includes(a.nom)) return 'Perturbation'; if (a.nom === 'Le Coupable' || a.effet.toLowerCase().includes('meurtre') || a.effet.toLowerCase().includes('élimin')) return 'Meurtre'; return 'Information'; }
+function renderBillets(){
+  const out = $('#billetsOut'); if (!BILLETS.length){ out.innerHTML = '<p class="empty">Aucun billet.</p>'; return; }
+  const enrich = BILLETS.map(b => { const a = atoutTiming(b.atout); return { ...b, a, cat: categorie(a) }; });
+  enrich.sort((x, y) => (ORDRE[x.cat] - ORDRE[y.cat]));
+  const groups = {}; enrich.forEach(b => (groups[b.cat] = groups[b.cat] || []).push(b));
+  out.innerHTML = Object.keys(ORDRE).filter(c => groups[c]).map(c => `<div class="billet-grp"><h4>${c}</h4>${groups[c].map(b => `<div class="billet"><b>${b.num ? nomCourt(+b.num) : '?'}</b> — ${esc(b.a ? b.a.nom : b.atout)}${b.cible ? ' → cible ' + esc(b.cible) : ''}${b.a ? '<br><span class="muted" style="font-size:13px">⚙️ ' + esc(b.a.effet) + '</span>' : '<br><span class="warn" style="font-size:13px">Atout inconnu</span>'}</div>`).join('')}</div>`).join('');
+}
+
+/* ============ HORLOGE + projection + wake-lock ============ */
+const PHASES = [{ n: 'Audience', m: 10 }, { n: 'Investigation', m: 15 }, { n: 'Délibéré', m: 5 }];
+const clk = { sec: 600, run: false, phase: 0, id: null, wake: null };
+function fmt(s){ const m = Math.floor(s / 60), r = s % 60; return m + ':' + String(r).padStart(2, '0'); }
+function paintClock(){
+  const low = clk.sec <= 30;
+  $('#timer').textContent = fmt(clk.sec); $('#timer').classList.toggle('low', low);
+  $('#phaseName').textContent = PHASES[clk.phase].n;
+  if ($('#projTimer')){ $('#projTimer').textContent = fmt(clk.sec); $('#projTimer').classList.toggle('low', low); $('#projPhase').textContent = PHASES[clk.phase].n; }
+}
+function tick(){ if (!clk.run) return; clk.sec--; if (clk.sec <= 0){ clk.sec = 0; clk.run = false; clearInterval(clk.id); carillon(); } paintClock(); }
+async function wakeOn(){ try { if ('wakeLock' in navigator) clk.wake = await navigator.wakeLock.request('screen'); } catch {} }
+function wakeOff(){ try { clk.wake && clk.wake.release(); clk.wake = null; } catch {} }
+function initClock(){
+  $('#phaseBtns').querySelectorAll('button').forEach(b => b.onclick = () => setPhaseBtn(b));
+  $('#startBtn').onclick = () => {
+    if (clk.run){ clk.run = false; clearInterval(clk.id); wakeOff(); $('#startBtn').textContent = '▶ Reprendre'; }
+    else { clk.run = true; wakeOn(); $('#startBtn').textContent = '⏸ Pause'; clk.id = setInterval(tick, 1000); }
+  };
+  $('#resetBtn').onclick = () => { clk.run = false; clearInterval(clk.id); wakeOff(); clk.sec = PHASES[clk.phase].m * 60; $('#startBtn').textContent = '▶ Démarrer'; paintClock(); };
+  $('#minus1').onclick = () => { clk.sec = Math.max(0, clk.sec - 60); paintClock(); };
+  $('#plus1').onclick = () => { clk.sec += 60; paintClock(); };
+  $('#nextPhase').onclick = () => { clk.phase = (clk.phase + 1) % PHASES.length; clk.sec = PHASES[clk.phase].m * 60; clk.run = false; clearInterval(clk.id); $('#startBtn').textContent = '▶ Démarrer'; $('#phaseBtns').querySelectorAll('button').forEach((b, i) => b.classList.toggle('sel', i === clk.phase)); paintClock(); };
+  $('#setCustom').onclick = () => { const m = Math.max(1, Math.min(60, +$('#customMin').value || 10)); clk.sec = m * 60; clk.run = false; clearInterval(clk.id); $('#startBtn').textContent = '▶ Démarrer'; paintClock(); };
+  $('#projBtn').onclick = () => openProjection();
+  $('#projClose').onclick = () => { $('#projection').classList.remove('on'); };
+  paintClock();
+}
+function setPhaseBtn(b){ const i = [...b.parentNode.children].indexOf(b); clk.phase = i; clk.sec = +b.dataset.min * 60; clk.run = false; clearInterval(clk.id); $('#startBtn').textContent = '▶ Démarrer'; b.parentNode.querySelectorAll('button').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); paintClock(); }
+function openProjection(){ $('#projection').classList.add('on'); syncProjection(); paintClock(); wakeOn(); }
+function syncProjection(){ const w = $('#projWall'); if (!w) return; const g = CURGAME; w.innerHTML = (g && g.clues && g.clues.length) ? g.clues.map(c => `<li>${esc(c)}</li>`).join('') : '<li style="opacity:.5">Aucun indice révélé.</li>'; }
+
+/* ============ liens partageables ============ */
+function handleHash(){
+  const h = location.hash.slice(1); if (!h) return;
+  const g = new URLSearchParams(h.replace(/&/g, '&'));
+  if (h.startsWith('j=')){ // fiche joueur : j=seed-n-idx
+    const [seed, n, idx] = h.slice(2).split('-').map(Number);
+    genererPartie(seed, n, 'int'); // déterministe
+    if (CURGAME && CURGAME.players[idx]) showPlayerCard(CURGAME, idx);
+  } else if (h.startsWith('g=')){
+    const [seed, n] = h.slice(2).split('-').map(Number); genererPartie(seed, n, 'int'); goTab('partie');
+  }
+}
+
+/* ============ service worker ============ */
+function registerSW(){ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {}); }
+
+/* ============ toast ============ */
+let toastT = null;
+function toast(msg){ let t = $('#toast'); if (!t){ t = el('div'); t.id = 'toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2600); }

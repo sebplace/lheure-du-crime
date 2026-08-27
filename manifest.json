@@ -1,0 +1,17 @@
+{
+  "name": "L'Heure du Crime — Console du Meneur de Jeu",
+  "short_name": "Heure du Crime",
+  "description": "Compagnon du Meneur de Jeu pour la murder party L'Heure du Crime : générer une partie, distribuer les rôles, horloge de jeu, mener la session — hors ligne.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#141019",
+  "theme_color": "#6e222b",
+  "categories": ["games", "entertainment", "utilities"],
+  "lang": "fr",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

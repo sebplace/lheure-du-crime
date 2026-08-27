@@ -840,6 +840,204 @@
    ]
   }
  ],
+ "atouts": [
+  {
+   "nom": "Le Médium",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Investigation",
+   "effet": "Désignez un joueur ; le MJ vous dit s'il est impliqué ou non dans le meurtre."
+  },
+  {
+   "nom": "Le Légiste",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Investigation (1×)",
+   "effet": "Apprenez si un Indice précis vise l'un des suspects du Cercle, ou s'il est une fausse piste."
+  },
+  {
+   "nom": "Le Détective",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Investigation",
+   "effet": "Désignez deux joueurs ; apprenez si au moins un est un Malfaiteur."
+  },
+  {
+   "nom": "Le Confesseur",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Investigation",
+   "effet": "Protégez un joueur d'un meurtre pour ce tour."
+  },
+  {
+   "nom": "Le Notaire",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Passif",
+   "effet": "Vous connaissez dès le départ le secret d'un autre joueur."
+  },
+  {
+   "nom": "Le Psychologue",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Investigation (1×)",
+   "effet": "Apprenez le camp d'un joueur."
+  },
+  {
+   "nom": "Le Commissaire",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Investigation (1×)",
+   "effet": "Apprenez combien de Malfaiteurs sont en jeu."
+  },
+  {
+   "nom": "Le Journaliste",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Audience",
+   "effet": "Forcez un joueur à révéler honnêtement l'un de ses Secrets, en public."
+  },
+  {
+   "nom": "Le Fouineur",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Investigation (1×)",
+   "effet": "Fouillez un joueur : il révèle franchement un de ses attributs privés, à votre choix."
+  },
+  {
+   "nom": "Le Majordome",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Passif",
+   "effet": "Recevez chaque tour un Indice de plus, en secret."
+  },
+  {
+   "nom": "L'Archiviste",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Investigation (1×)",
+   "effet": "Reconsultez un Indice retiré ou déplacé, et repérez la trace d'un trucage."
+  },
+  {
+   "nom": "L'Avocat",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Délibéré (1×)",
+   "effet": "Annulez un Acte d'accusation avant le vote."
+  },
+  {
+   "nom": "L'Enquêteur de terrain",
+   "camp": "enq",
+   "kind": "atout",
+   "timing": "Investigation (1×)",
+   "effet": "Faites sortir un Indice plus tôt et rendez-le inannulable ce tour."
+  },
+  {
+   "nom": "Le Coupable",
+   "camp": "malf",
+   "kind": "atout",
+   "timing": "Investigation",
+   "effet": "Vous avez commis le meurtre. Vous pouvez frapper une seconde fois. Vous connaissez vos complices."
+  },
+  {
+   "nom": "Le Corrupteur",
+   "camp": "malf",
+   "kind": "atout",
+   "timing": "Investigation",
+   "effet": "Égarez un joueur : toutes ses informations de ce tour sont fausses."
+  },
+  {
+   "nom": "L'Usurpateur",
+   "camp": "malf",
+   "kind": "atout",
+   "timing": "Passif",
+   "effet": "Vous apparaissez innocent aux Atouts d'information."
+  },
+  {
+   "nom": "L'Étouffeur",
+   "camp": "malf",
+   "kind": "atout",
+   "timing": "Investigation (1×)",
+   "effet": "Annulez un Indice avant sa révélation (cela laisse une trace au mur)."
+  },
+  {
+   "nom": "Le Maquilleur",
+   "camp": "malf",
+   "kind": "atout",
+   "timing": "Investigation (1×)",
+   "effet": "Faites remplacer par le MJ un trait public d'un personnage sur la Liste des invités, avant la prochaine révélation (cela laisse une trace)."
+  },
+  {
+   "nom": "Le Faussaire",
+   "camp": "malf",
+   "kind": "atout",
+   "timing": "Investigation (1×)",
+   "effet": "Injectez une fausse piste de votre choix dans le dossier du MJ."
+  },
+  {
+   "nom": "Le Complice",
+   "camp": "malf",
+   "kind": "atout",
+   "timing": "Passif",
+   "effet": "Vous connaissez le Coupable, vous votez toujours pour l'acquitter et pouvez lui fournir un alibi."
+  },
+  {
+   "nom": "Le Bouc émissaire",
+   "camp": "malf",
+   "kind": "atout",
+   "timing": "Investigation (1×)",
+   "effet": "Désignez en secret un innocent hors du Cercle : au tour suivant, le MJ fabrique une charge contre lui pour détourner les soupçons du Coupable."
+  },
+  {
+   "nom": "L'Ombre",
+   "camp": "malf",
+   "kind": "atout",
+   "timing": "Investigation (1×)",
+   "effet": "Étouffez une piste : un Atout d'information de votre choix renvoie « Rien à signaler » à son porteur ce tour."
+  },
+  {
+   "nom": "Le Maître-chanteur",
+   "camp": "intr",
+   "kind": "objectif",
+   "timing": "Objectif",
+   "effet": "Vous gagnez si vous énoncez à voix haute, avant la fin, le secret exact d'au moins DEUX autres joueurs."
+  },
+  {
+   "nom": "L'Éminence grise",
+   "camp": "intr",
+   "kind": "objectif",
+   "timing": "Objectif",
+   "effet": "Vous gagnez si c'est VOUS qui menez publiquement l'Acte d'accusation démasquant le Coupable."
+  },
+  {
+   "nom": "Le Caméléon",
+   "camp": "intr",
+   "kind": "objectif",
+   "timing": "Objectif",
+   "effet": "Vous gagnez si vous finissez SANS avoir été formellement accusé, et sans que votre secret soit révélé."
+  },
+  {
+   "nom": "Le Vengeur",
+   "camp": "intr",
+   "kind": "objectif",
+   "timing": "Objectif",
+   "effet": "Vous gagnez si le personnage désigné au dos de cette carte est formellement accusé au cours de la partie."
+  },
+  {
+   "nom": "Le Mondain",
+   "camp": "intr",
+   "kind": "objectif",
+   "timing": "Objectif",
+   "effet": "Vous gagnez si au moins DEUX joueurs déclarent publiquement vous faire confiance au dernier tour."
+  },
+  {
+   "nom": "Le Dépositaire",
+   "camp": "intr",
+   "kind": "objectif",
+   "timing": "Objectif",
+   "effet": "Vous gagnez si DEUX joueurs vous confient, de leur plein gré, leur secret avant la fin (le MJ valide chaque confidence)."
+  }
+ ],
  "neutral_dims": [
   "main",
   "bague",

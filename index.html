@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>L'Heure du Crime — Console du Meneur de Jeu</title>
-<meta name="description" content="Compagnon du Meneur de Jeu pour la murder party L'Heure du Crime : générer une partie, composer la table, horloge de jeu, mener la session.">
+<meta name="description" content="Compagnon du Meneur de Jeu pour la murder party L'Heure du Crime : générer une partie, distribuer les rôles, horloge de jeu, mener la session — installable et hors ligne.">
 <meta name="theme-color" content="#6e222b">
+<link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -17,7 +19,8 @@
 
 <header class="top">
   <div class="hdr-tools">
-    <button id="soundBtn" title="Son du carillon">🔔</button>
+    <button id="installBtn" title="Installer l'app" style="display:none">⤓</button>
+    <button id="soundBtn" title="Son">🔔</button>
     <button id="themeBtn" title="Mode jour / nuit">☾</button>
   </div>
   <svg class="clock" viewBox="0 0 100 100" aria-hidden="true">
@@ -33,50 +36,60 @@
 
 <nav class="tabs">
   <button data-tab="table" class="active">Table</button>
-  <button data-tab="generateur">Générateur</button>
+  <button data-tab="partie">Partie</button>
+  <button data-tab="enjeu">En jeu</button>
+  <button data-tab="roles">Rôles</button>
   <button data-tab="horloge">Horloge</button>
-  <button data-tab="conduite">Conduite</button>
-  <button data-tab="aide">Aide-mémoire</button>
+  <button data-tab="boite">Boîte</button>
+  <button data-tab="aide">Aide</button>
 </nav>
 
 <main>
-  <!-- ============ TABLE ============ -->
+  <!-- TABLE -->
   <section id="table" class="panel active">
     <h2 class="sec">Combien de convives&nbsp;?</h2>
-    <div class="rowflex">
-      <label>Joueurs : <select id="npl"></select></label>
-      <span class="muted">(hors Meneur de Jeu)</span>
-    </div>
+    <div class="rowflex"><label>Joueurs : <select id="npl"></select></label><span class="muted">(hors MJ)</span></div>
     <div id="compo"></div>
   </section>
 
-  <!-- ============ GÉNÉRATEUR ============ -->
-  <section id="generateur" class="panel">
-    <h2 class="sec">Générer une partie complète</h2>
-    <p class="muted">Une intrigue clé en main : table, distribution des rôles, Cercle isolant, Indices,
-      fausses pistes et alignement Secrets / Rumeurs. Chaque partie a une <b>graine</b> partageable.</p>
+  <!-- PARTIE -->
+  <section id="partie" class="panel">
+    <h2 class="sec">Générer une partie</h2>
     <div class="rowflex">
+      <label>Difficulté : <select id="diff">
+        <option value="deb">Débutant</option>
+        <option value="int" selected>Intermédiaire</option>
+        <option value="adv">Avancé</option></select></label>
       <label>Taille : <select id="autoN"><option value="0">au hasard</option></select></label>
-      <button class="act big-act" id="autoGen">🎲 Générer une partie</button>
+      <button class="act big-act" id="autoGen">🎲 Générer</button>
     </div>
     <div id="autoOut"></div>
+
+    <h2 class="sec">Bibliothèque de parties</h2>
+    <div id="library"></div>
 
     <h2 class="sec">Scénarios d'initiation</h2>
     <div class="rowflex" id="scenBtns"></div>
 
     <h2 class="sec">Cercle sur mesure</h2>
-    <p class="muted">Cochez les personnages <b>présents</b>, la console isole un Cercle de trois suspects.</p>
+    <p class="muted">Cochez les présents ; la console isole un Cercle de trois suspects.</p>
     <div class="rowflex" style="margin:6px 0">
       <button class="ghost" id="selDefault">Sélection type (14)</button>
       <button class="ghost" id="selClear">Tout décocher</button>
       <span class="muted"><span id="selCount">0</span> cochés</span>
     </div>
     <div class="grid" id="castGrid"></div>
-    <div class="rowflex" style="margin-top:10px"><button class="act" id="genCercle">Trouver un Cercle isolant</button></div>
+    <div class="rowflex" style="margin-top:10px"><button class="act" id="genCercle">Trouver un Cercle</button></div>
     <div id="cercleOut"></div>
   </section>
 
-  <!-- ============ HORLOGE ============ -->
+  <!-- EN JEU (dashboard) -->
+  <section id="enjeu" class="panel"><div id="dashboard"></div></section>
+
+  <!-- ROLES -->
+  <section id="roles" class="panel"><div id="rolesOut"></div></section>
+
+  <!-- HORLOGE -->
   <section id="horloge" class="panel">
     <div class="clockface">
       <div class="timer" id="timer">10:00</div>
@@ -93,93 +106,64 @@
     </div>
     <div class="timer-ctl">
       <button class="act" id="startBtn">▶ Démarrer</button>
-      <button class="ghost" id="resetBtn">↻ Réinitialiser</button>
-      <button class="ghost" id="minus1">−1 min</button>
-      <button class="ghost" id="plus1">+1 min</button>
-      <button class="ghost" id="nextPhase">Phase suivante →</button>
+      <button class="ghost" id="resetBtn">↻ Réinit.</button>
+      <button class="ghost" id="minus1">−1</button>
+      <button class="ghost" id="plus1">+1</button>
+      <button class="ghost" id="nextPhase">Phase →</button>
+      <button class="ghost" id="projBtn">⛶ Projection</button>
     </div>
-    <div class="tip" style="text-align:center">Au zéro, le <b>Carillon</b> sonne (son + éclat doré) : la phase est close.
-      « Phase suivante » enchaîne Audience → Investigation → Délibéré, et relance l'horloge.</div>
+    <div class="tip" style="text-align:center">Au zéro, le <b>Carillon</b> sonne. « Phase → » enchaîne Audience → Investigation → Délibéré. « Projection » : plein écran pour la table.</div>
   </section>
 
-  <!-- ============ CONDUITE ============ -->
-  <section id="conduite" class="panel">
-    <div class="rowflex between">
-      <h2 class="sec" style="border:none;margin-bottom:0">Suivi de la partie</h2>
-      <button class="ghost" id="resetSession" style="font-size:13px">Nouvelle partie</button>
-    </div>
-
-    <h3 class="sub">Ouverture</h3>
-    <ul class="checklist" id="ouverture">
-      <li>Décor + découverte du corps (un PNJ, jamais un joueur)</li>
-      <li>Recensement partiel (total des perturbateurs, sans le détail)</li>
-      <li>Distribuer personnages + Atouts + 1 carte Secret / joueur</li>
-      <li>Reconnaissances secrètes (alliés Malfaiteurs, cible du Vengeur ; « Rien à signaler » aux autres)</li>
-      <li>Distribuer 2 Rumeurs / joueur + consigne d'échange</li>
-      <li>« Mes apartés ne sont jamais un indice »</li>
-      <li>Dossier d'ouverture (1 Indice + 1 par tranche de ~6 joueurs)</li>
-    </ul>
-
+  <!-- BOITE -->
+  <section id="boite" class="panel">
+    <h2 class="sec">Boîte à requêtes — résolution assistée</h2>
+    <p class="muted">Saisissez chaque billet reçu. La console les <b>trie</b> dans l'ordre
+      Protection → Perturbation → Information → Meurtre et rappelle l'effet de l'Atout.</p>
     <div class="card">
-      <div class="rowflex between">
-        <div><h3 class="sub">Actes d'accusation restants</h3>
-          <div class="counter"><button id="actMinus">−</button><span class="val" id="actVal">2</span><button id="actPlus">+</button></div>
-          <p class="muted" style="font-size:13px">2 pour toute la partie · chaque accusation en coûte un.</p>
-        </div>
-        <div><h3 class="sub">Tour</h3>
-          <div class="counter"><button id="tourMinus">−</button><span class="val" id="tourVal">1</span><button id="tourPlus">+</button></div>
-        </div>
+      <div class="rowflex">
+        <input type="number" id="bNum" placeholder="n°" style="width:70px" min="1" max="40">
+        <input type="text" id="bAtout" placeholder="Atout (ex. Médium)" list="atoutList" style="flex:1;min-width:150px">
+        <input type="text" id="bCible" placeholder="cible (n°)" style="width:110px">
+        <button class="act" id="addBillet">Ajouter</button>
       </div>
+      <datalist id="atoutList"></datalist>
     </div>
-
-    <h3 class="sub">Mur d'enquête — Indices révélés</h3>
-    <div class="card">
-      <div class="rowflex"><input type="text" id="clueInput" placeholder="ex. Le meurtrier est gaucher" style="flex:1;min-width:180px"><button class="act" id="addClue">Épingler</button></div>
-      <ul class="checklist" id="clueList" style="margin-top:8px"></ul>
-    </div>
-
-    <h3 class="sub">Investigation — ordre de la boîte à requêtes</h3>
-    <div class="card"><p><span class="pill">1 · Protection</span> <span class="pill">2 · Perturbation</span>
-      <span class="pill">3 · Information</span> <span class="pill">4 · Meurtre</span></p>
-      <p class="muted" style="font-size:13px">Tout le monde dépose un billet (même « je passe ») ; réponse pliée à chacun. Rien après le Carillon.</p></div>
-
-    <h3 class="sub">Second meurtre &amp; Fantôme</h3>
-    <div class="tip">Le Coupable frappe une <b>seule fois de plus</b> (jamais un Malfaiteur). La victime devient
-      <b>Fantôme</b> : elle garde son <b>vote final</b> et livre un <b>dernier indice</b> qui fait avancer l'enquête.</div>
-
-    <h3 class="sub">Qui l'emporte</h3>
-    <table>
-      <tr><th>Camp</th><th>Victoire si…</th></tr>
-      <tr><td><b>Enquêteurs</b></td><td>le vrai Coupable est accusé à la majorité avant la fin.</td></tr>
-      <tr><td><b>Malfaiteurs</b></td><td>à la fin, le Coupable n'a jamais été condamné.</td></tr>
-      <tr><td><b>Intrigants</b></td><td>chacun vérifie son objectif personnel, quel que soit le vainqueur.</td></tr>
-    </table>
+    <div class="rowflex"><button class="act" id="resolve">Résoudre le lot</button>
+      <button class="ghost" id="clearBillets">Vider</button></div>
+    <div id="billetsOut"></div>
   </section>
 
-  <!-- ============ AIDE ============ -->
+  <!-- AIDE -->
   <section id="aide" class="panel">
     <h2 class="sec">Les garde-fous (à ne jamais toucher)</h2>
     <div class="warn">Cercle de <b>3</b> · isolé par <b>≥ 2 traits publics flous</b> · <b>2 Actes</b> ·
       condamnation = <b>arrestation</b> · le Coupable n'a <b>aucune échappatoire personnelle</b> ni <b>vrai Alibi</b>.</div>
     <h2 class="sec">La règle de l'entonnoir</h2>
-    <p>Chaque Indice public vise un trait <b>partagé par plusieurs</b> personnages : c'est
-      <b>l'intersection d'au moins deux traits</b> qui isole les trois finalistes. La Pilosité ne sert
-      jamais à isoler (décor et fausse piste).</p>
-    <h2 class="sec">Les deux entonnoirs</h2>
-    <table><tr><th>Couche</th><th>Support</th><th>Va de…</th></tr>
-      <tr><td>Publique</td><td>Indices (traits publics)</td><td>la table → 3</td></tr>
-      <tr><td>Privée</td><td>Secrets + Rumeurs</td><td>3 → 1</td></tr></table>
+    <p>Chaque Indice vise un trait <b>partagé</b> : c'est <b>l'intersection d'au moins deux traits</b> qui
+      isole les trois finalistes. La Pilosité ne sert jamais à isoler.</p>
     <h2 class="sec">Aligner les Secrets</h2>
-    <p><b>Coupable</b> → carte Secret <b>accablante</b> (2 faits à charge, aucune décharge) : aucune exonération.
-      <b>Chaque leurre</b> → carte Secret contenant le fait de sa <b>Rumeur-décharge</b> : sa décharge circule et le blanchit.</p>
+    <p><b>Coupable</b> → Secret <b>accablant</b> (aucune décharge). <b>Chaque leurre</b> → Secret contenant
+      le fait de sa <b>Rumeur-décharge</b> : sa décharge circule et le blanchit.</p>
     <h2 class="sec">Difficulté avancée</h2>
     <p>Coupez le Corbeau · armez les Complices (Maquilleur, Étouffeur, Faussaire, Usurpateur) · fausses
-      pistes plus serrées · un Intrigant comme leurre · retirez le levier d'Alibi.</p>
+      pistes serrées · un Intrigant comme leurre · retirez le levier d'Alibi.</p>
+    <h2 class="sec">À propos</h2>
+    <p class="muted">Console installable et hors-ligne. Tout tourne dans votre navigateur ; aucune donnée n'est envoyée.
+      Le jeu physique (règles, Livre du MJ, scénarios) l'accompagne.</p>
   </section>
 </main>
 
+<!-- PROJECTION plein écran -->
+<div id="projection" class="projection">
+  <button class="proj-close" id="projClose">✕</button>
+  <div class="proj-timer" id="projTimer">10:00</div>
+  <div class="proj-phase" id="projPhase">Audience</div>
+  <div class="proj-wall"><h3>Le mur d'enquête</h3><ul id="projWall"></ul></div>
+</div>
+
 <footer>
-  L'Heure du Crime — murder party d'enquête victorienne · Console MJ · tout tourne dans votre navigateur, aucune donnée envoyée.
+  L'Heure du Crime — murder party d'enquête victorienne · Console MJ · installable &amp; hors-ligne.
 </footer>
 
 <script src="app.js"></script>
