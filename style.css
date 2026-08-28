@@ -175,7 +175,7 @@ footer a{color:var(--gold-lt)}
 .projection{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;
   background:radial-gradient(120% 100% at 50% 30%, #241a2e 0%, #0d0a12 70%);color:#ecdcc0;text-align:center;padding:20px}
 .projection.on{display:flex}
-.proj-close{position:absolute;top:16px;right:16px;width:44px;height:44px;border-radius:50%;border:1px solid #c9a24a;background:transparent;color:#c9a24a;font-size:20px;cursor:pointer}
+.proj-close{position:absolute;top:16px;right:16px;width:44px;height:44px;border-radius:50%;border:1px solid #c9a24a;background:transparent;color:#c9a24a;font-size:20px;cursor:pointer;z-index:3}
 .proj-timer{font-family:'Playfair Display',serif;font-weight:900;font-variant-numeric:tabular-nums;
   font-size:clamp(90px,24vw,260px);line-height:1;color:#e6c96a;text-shadow:0 6px 40px rgba(0,0,0,.6)}
 .proj-timer.low{color:#e0574f}
@@ -296,7 +296,7 @@ table.cmp tr.cmp-eq td{background:color-mix(in srgb,var(--gold) 22%, transparent
 .proj-candle{position:absolute;inset:0;pointer-events:none;z-index:0;mix-blend-mode:screen;
   background:radial-gradient(58% 46% at 50% 40%, rgba(232,182,92,.17), transparent 72%);
   animation:candle 4.6s ease-in-out infinite}
-.projection>*:not(.proj-candle){position:relative;z-index:1}
+.projection>*:not(.proj-candle):not(.proj-close){position:relative;z-index:1}
 @keyframes candle{0%,100%{opacity:.55;transform:scale(1)}22%{opacity:.78;transform:scale(1.015)}
   46%{opacity:.48;transform:scale(.997)}68%{opacity:.82;transform:scale(1.01)}84%{opacity:.6}}
 @media (prefers-reduced-motion:reduce){.proj-candle{animation:none;opacity:.6}}
