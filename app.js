@@ -14,13 +14,13 @@ const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
 /* ============ état global ============ */
 let DATA = null, BYNUM = {}, NEUTRAL = [], LABELS = {};
 const LSK = 'hdc_mj_v3', LIBK = 'hdc_mj_lib_v3', CURK = 'hdc_mj_cur_v3';
-const store = Object.assign({ theme: 'day', sound: true, ambVol: 0.5, fontScale: 1, acc: {}, seenWelcome: false }, load(LSK));
+const store = Object.assign({ theme: 'day', sound: true, ambVol: 0.5, fontScale: 1, acc: {}, seenWelcome: false, comfort: false }, load(LSK));
 let LIB = load(LIBK) || [];
 let CURGAME = load(CURK) || null;
 
 function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
 function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
-const persist = () => save(LSK, { theme: store.theme, sound: store.sound, ambVol: store.ambVol, fontScale: store.fontScale, acc: store.acc, seenWelcome: store.seenWelcome });
+const persist = () => save(LSK, { theme: store.theme, sound: store.sound, ambVol: store.ambVol, fontScale: store.fontScale, acc: store.acc, seenWelcome: store.seenWelcome, comfort: store.comfort });
 const persistCur = () => save(CURK, CURGAME);
 const persistLib = () => save(LIBK, LIB);
 
@@ -469,6 +469,7 @@ function ensureLive(g){
   if (!Array.isArray(g.live.accused)) g.live.accused = [];
   if (!g.live.obj) g.live.obj = {};
   if (g.live.vivants == null) g.live.vivants = g.present.length;
+  if (!Array.isArray(g.live.alibis)) g.live.alibis = [];
   if (g.live.notes == null) g.live.notes = '';
   if (g.vengeurCible === undefined) g.vengeurCible = (g.players.find(p => p.atout === 'Le Vengeur') || {}).cible ?? null;
 }
@@ -543,6 +544,11 @@ function renderDashboard(){
       <div id="verdictBox"></div>
     </div>
     <div class="card">
+      <h3 class="fic">Suivi des Alibis</h3>
+      <p class="muted" style="font-size:13px">Marquez qui a dégainé son Alibi. Un Alibi joué place le suspect hors de cause, jusqu'à ce qu'un fait nouveau le relance.</p>
+      <div id="alibiTrack"></div>
+    </div>
+    <div class="card">
       <h3 class="fic">Second meurtre <span class="muted" style="font-weight:400">(arbitrage)</span></h3>
       <div class="rowflex"><label>Victime : <select id="killWho">${victimOpts}</select></label><button class="ghost" id="doKill">🕯️ Frapper</button></div>
       <p class="tip" id="killHint">${g.vengeurCible != null ? 'Cible du Vengeur suggérée : <b>' + esc(nomCourt(g.vengeurCible)) + '</b>.' : 'Victime = un Enquêteur ou un Intrigant.'}</p>
@@ -577,7 +583,7 @@ function renderDashboard(){
     if (a === 'tour-') g.tour = Math.max(1, g.tour - 1); if (a === 'tour+') g.tour++;
     persistCur(); $('#dActs').textContent = g.acts; $('#dTour').textContent = g.tour; $('#nextClue') && ($('#nextClue').textContent = 'Indice du tour ' + g.tour); paintStatus();
   });
-  renderOuverture(g); renderWall(g); renderJournal(g); renderObjTrack(g); renderVerdict(g); renderEvents(g); renderVivants(g);
+  renderOuverture(g); renderWall(g); renderJournal(g); renderObjTrack(g); renderVerdict(g); renderEvents(g); renderVivants(g); renderAlibis(g);
   $('#mjNotes').value = g.live.notes || '';
   $('#mjNotes').oninput = e => { g.live.notes = e.target.value; persistCur(); };
   box.querySelectorAll('[data-vv]').forEach(b => b.onclick = () => { pushUndo(g, 'vivants'); const d = b.dataset.vv === '+' ? 1 : -1; g.live.vivants = Math.max(1, (g.live.vivants || g.present.length) + d); persistCur(); renderVivants(g); });
@@ -618,6 +624,22 @@ function renderVivants(g){
   const b = $('#vivN'); if (!b) return; b.textContent = g.live.vivants;
   const n = g.live.vivants, maj = Math.floor((n - 1) / 2) + 1;
   const o = $('#vivOut'); if (o) o.innerHTML = `Majorité : <b>${maj}</b> voix sur ${n - 1} (l'accusé·e ne vote pas). Égalité → pas d'arrestation.`;
+}
+function renderAlibis(g){
+  const box = $('#alibiTrack'); if (!box) return;
+  const burned = g.live.alibis || (g.live.alibis = []);
+  const nb = burned.length;
+  box.innerHTML = `<div class="alibi-grid">${g.present.map(num => {
+    const on = burned.includes(num);
+    return `<button class="chip alibi-chip${on ? ' spent' : ''}" data-num="${num}" type="button"><b>${esc(nomCourt(num))}</b><span>${on ? '🛡️ Alibi dégainé' : 'Alibi intact'}</span></button>`;
+  }).join('')}</div>
+    <p class="tip" style="font-size:13px">${nb ? nb + ' Alibi(s) dégainé(s) : ' + burned.map(nomCourt).map(esc).join(', ') + '.' : 'Aucun Alibi dégainé pour l\'instant.'}</p>`;
+  box.querySelectorAll('.alibi-chip').forEach(bt => bt.onclick = () => {
+    const num = +bt.dataset.num, set = g.live.alibis, i = set.indexOf(num);
+    if (i >= 0){ set.splice(i, 1); journal(g, '🛡️ ' + nomCourt(num) + ' : Alibi retiré, de nouveau contestable.'); }
+    else { set.push(num); journal(g, '🛡️ ' + nomCourt(num) + ' a dégainé son Alibi (hors de cause).'); }
+    persistCur(); renderAlibis(g);
+  });
 }
 function renderVerdict(g){
   const box = $('#verdictBox'); if (!box) return;
@@ -671,12 +693,33 @@ function openDenouement(g){
     ov.innerHTML = `<button class="proj-close" id="denoClose">✕</button><div class="deno-body">${steps.slice(0, step + 1).map(s => `<div class="deno-step">${s}</div>`).join('')}
       <div class="rowflex" style="justify-content:center;margin-top:18px;gap:10px">
         ${step < steps.length - 1 ? '<button class="act" id="denoNext">Révéler la suite ▸</button>' : '<button class="act" id="denoPrint">🖨️ Imprimer</button>'}
+        <button class="ghost" id="denoCopy">⧉ Copier le récap</button>
         <button class="ghost" id="denoClose2">Fermer</button></div></div>`;
     $('#denoClose').onclick = $('#denoClose2').onclick = () => ov.classList.remove('on');
     if ($('#denoNext')) $('#denoNext').onclick = () => { step++; render(); };
     if ($('#denoPrint')) $('#denoPrint').onclick = () => window.print();
+    $('#denoCopy').onclick = () => copyDenouement(g);
   };
-  render(); ov.classList.add('on'); wakeOn();
+  render(); ov.classList.add('on'); denoCue(); wakeOn();
+}
+function denoCue(){ [523, 415, 330].forEach((f, i) => bell(f, i * 0.55, 1.3, 'sine')); haptic([25, 70, 25]); }
+function copyDenouement(g){
+  ensureLive(g);
+  const camp = g.live.condemned == null ? null : (g.live.condemned === g.coupable ? 'enq' : 'malf');
+  const L = [];
+  L.push(`L'HEURE DU CRIME, récap de partie (${g.n} joueurs, ${diffLabel(g.diff)})`);
+  L.push(`Victime : ${g.victime}, ${g.mort}.`);
+  L.push(`Cercle : ${g.cercle.map(nomCourt).join(', ')}.`);
+  L.push(`Coupable : ${nomCourt(g.coupable)} (mobile : ${g.mobile}).`);
+  L.push(`Complices : ${g.complices.map(nomCourt).join(', ') || 'aucun'}.`);
+  if (g.live.secondVictim != null) L.push(`2ᵉ victime : ${nomCourt(g.live.secondVictim)}.`);
+  if (g.live.alibis && g.live.alibis.length) L.push(`Alibis dégainés : ${g.live.alibis.map(nomCourt).join(', ')}.`);
+  if (g.live.condemned != null) L.push(`Verdict : ${nomCourt(g.live.condemned)} condamné·e. ${camp === 'enq' ? "Les Enquêteurs l'emportent." : "Les Malfaiteurs l'emportent."}`);
+  else L.push('Verdict : aucune condamnation enregistrée.');
+  const intr = g.players.filter(p => p.camp === 'intr');
+  if (intr.length){ L.push('Intrigants :'); intr.forEach(p => { const r = objResult(g, p); L.push(`  ${nomCourt(p.num)}, ${p.atout} : ${r === 'ok' ? 'réussi' : r === 'ko' ? 'raté' : 'indéterminé'}`); }); }
+  if (g.journal && g.journal.length){ L.push('Déroulé :'); g.journal.slice().reverse().forEach(j => L.push('  ' + j.replace(/[—–]/g, ':'))); }
+  navigator.clipboard.writeText(L.join('\n')).then(() => toast('Récap copié dans le presse-papiers.')).catch(() => toast('Copie impossible sur cet appareil.'));
 }
 function renderOuverture(g){
   const box = $('#ouvList'); if (!box) return; box.innerHTML = '';
@@ -903,12 +946,14 @@ function initAmbiance(){
 
 /* ============ accessibilité ============ */
 function applyFontScale(){ const s = Math.min(1.5, Math.max(0.85, store.fontScale || 1)); document.documentElement.style.zoom = s; const v = $('#fsVal'); if (v) v.textContent = Math.round(s * 100) + '%'; }
+function applyComfort(){ document.body.classList.toggle('comfort', !!store.comfort); const b = $('#comfortBtn'); if (b){ b.classList.toggle('on', !!store.comfort); b.textContent = store.comfort ? '✓ Mode grand confort' : 'Mode grand confort'; } }
 function initA11y(){
-  applyFontScale();
+  applyFontScale(); applyComfort();
   const set = d => { store.fontScale = Math.min(1.5, Math.max(0.85, +(((store.fontScale || 1) + d).toFixed(2)))); persist(); applyFontScale(); };
   $('#fsMinus') && ($('#fsMinus').onclick = () => set(-0.1));
   $('#fsPlus') && ($('#fsPlus').onclick = () => set(0.1));
   $('#fsReset') && ($('#fsReset').onclick = () => { store.fontScale = 1; persist(); applyFontScale(); });
+  $('#comfortBtn') && ($('#comfortBtn').onclick = () => { store.comfort = !store.comfort; persist(); applyComfort(); });
   document.addEventListener('keydown', e => {
     if (!$('#horloge') || !$('#horloge').classList.contains('active')) return;
     const t = e.target.tagName; if (t === 'INPUT' || t === 'SELECT' || t === 'TEXTAREA') return;
@@ -958,6 +1003,16 @@ function makeAccordion(container){
 
 function initCastFilter(){
   const dim = $('#castDim'), val = $('#castVal'); if (!dim) return;
+  const sInput = $('#castSearch');
+  if (sInput) sInput.oninput = () => {
+    const q = sInput.value.trim().toLowerCase(), out = $('#castSearchOut');
+    if (!out) return;
+    if (!q){ out.innerHTML = ''; return; }
+    const list = DATA.cast.filter(c => c.nom.toLowerCase().includes(q) || (c.role || '').toLowerCase().includes(q) || String(c.num) === q || nomCourt(c.num).toLowerCase().includes(q)).slice(0, 12);
+    out.innerHTML = list.length
+      ? list.map(c => `<div class="prow" style="padding:5px 0"><div class="who"><b>${esc(c.nom)}</b> <span class="muted">(${esc(nomCourt(c.num))})</span><div class="r">${esc(c.role)} · ${Object.keys(LABELS).map(d => LABELS[d] + ' : ' + esc(c.pub[d])).join(' · ')}</div></div></div>`).join('')
+      : '<p class="empty">Aucun personnage trouvé.</p>';
+  };
   Object.keys(LABELS).forEach(d => dim.appendChild(new Option(LABELS[d], d)));
   const fillVals = () => { const d = dim.value; const vals = [...new Set(DATA.cast.map(c => c.pub[d]))].sort(); val.innerHTML = ''; vals.forEach(v => val.appendChild(new Option(v, v))); render(); };
   const render = () => {
@@ -980,10 +1035,11 @@ function showWelcome(){
       <li><b>③ Menez</b> — onglet <b>En jeu</b> : compteurs, indices, accusation, Dénouement. La barre du haut suit toujours l'état.</li>
     </ol>
     <p class="tip">Installable et hors-ligne. Réglages & aide dans l'onglet <b>Aide</b>.</p>
-    <div class="rowflex" style="justify-content:center;margin-top:10px"><button class="act big-act" id="wStart">Commencer</button></div>
+    <div class="rowflex" style="justify-content:center;margin-top:10px;gap:10px">${(CURGAME && CURGAME.players) ? '<button class="act" id="wResume">▶ Reprendre la partie en cours</button>' : ''}<button class="${(CURGAME && CURGAME.players) ? 'ghost' : 'act big-act'}" id="wStart">Commencer</button></div>
   </div>`;
   ov.classList.add('on');
   $('#wStart').onclick = () => { store.seenWelcome = true; persist(); ov.classList.remove('on'); };
+  if ($('#wResume')) $('#wResume').onclick = () => { store.seenWelcome = true; persist(); ov.classList.remove('on'); renderDashboard(); goTab('enjeu'); };
 }
 
 /* ============ service worker ============ */

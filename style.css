@@ -322,6 +322,27 @@ table.cmp tr.cmp-eq td{background:color-mix(in srgb,var(--gold) 22%, transparent
 }
 @media (min-width:641px) and (max-width:980px){ main{max-width:92%} }
 
+/* ---------- Suivi des Alibis ---------- */
+.alibi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:7px;margin:6px 0}
+.alibi-chip{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;
+  background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 11px;cursor:pointer;transition:.14s}
+.alibi-chip:hover{background:var(--panel2)}
+.alibi-chip b{font-size:13.5px;color:var(--ox)} .alibi-chip span{font-size:11.5px;color:var(--ink-soft)}
+.alibi-chip.spent{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%, var(--panel));box-shadow:0 1px 6px var(--shadow)}
+.alibi-chip.spent b{color:var(--gold-lt)} .alibi-chip.spent span{color:var(--gold-lt);font-weight:700}
+
+/* ---------- Mode grand confort ---------- */
+#comfortBtn.on{background:color-mix(in srgb,var(--gold) 20%, var(--panel));border-color:var(--gold);color:var(--ox);font-weight:700}
+body.comfort nav.tabs button{padding:11px 20px;font-size:18px}
+body.comfort button.act,body.comfort button.ghost{padding:13px 24px;font-size:17px;min-height:48px}
+body.comfort .sb-btn,body.comfort .sb-item,body.comfort .sb-time{min-height:40px}
+body.comfort .chip,body.comfort .alibi-chip{padding:12px 14px}
+body.comfort .chip b,body.comfort .alibi-chip b{font-size:15px}
+body.comfort .mini-ctl button,body.comfort .dash-mini .mini-ctl button{width:40px;height:40px;font-size:20px}
+body.comfort .evt-btn{padding:11px 15px;font-size:15px}
+body.comfort textarea,body.comfort input[type=text],body.comfort input[type=number]{font-size:16px;padding:9px 11px}
+
+
 /* ---------- PRINT ---------- */
 @media print{
   header,nav,footer,.hdr-tools,.seedbar,.timer-ctl,.phase-btns,.no-print{display:none!important}
