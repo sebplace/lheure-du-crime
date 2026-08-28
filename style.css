@@ -40,8 +40,16 @@ main,header,nav,footer{position:relative; z-index:2}
 header.top{
   text-align:center; padding:20px 60px 10px; border-bottom:2px solid var(--gold);
   background:linear-gradient(180deg, color-mix(in srgb,var(--panel) 80%, transparent), transparent);
-  position:relative;
+  position:relative; overflow:hidden;
 }
+header.top::before{
+  content:""; position:absolute; top:0; right:0; bottom:0; width:min(42%,260px); z-index:0;
+  pointer-events:none; opacity:.10;
+  background:url('img/amb_pendule.webp') right center/cover no-repeat;
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 65%);
+  mask-image:linear-gradient(90deg, transparent, #000 65%);
+}
+header.top .clock, header.top h1, header.top .sub{position:relative; z-index:1}
 header .clock{width:46px;height:46px;margin:0 auto 2px;display:block;filter:drop-shadow(0 2px 6px var(--shadow))}
 header h1{font-family:'Playfair Display',serif; font-weight:800; color:var(--ox);
   font-size:clamp(21px,4.5vw,30px); margin:0; letter-spacing:.01em}
@@ -173,7 +181,11 @@ footer a{color:var(--gold-lt)}
 .empty{color:var(--ink-soft);font-style:italic;padding:12px 0}
 
 .projection{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(120% 100% at 50% 30%, #241a2e 0%, #0d0a12 70%);color:#ecdcc0;text-align:center;padding:20px}
+  background:
+    linear-gradient(180deg, rgba(13,10,18,.62), rgba(13,10,18,.86)),
+    radial-gradient(120% 100% at 50% 32%, rgba(36,26,46,.30) 0%, rgba(13,10,18,.78) 72%),
+    url('img/amb_manoir.webp') center/cover no-repeat;
+  color:#ecdcc0;text-align:center;padding:20px}
 .projection.on{display:flex}
 .proj-close{position:absolute;top:16px;right:16px;width:44px;height:44px;border-radius:50%;border:1px solid #c9a24a;background:transparent;color:#c9a24a;font-size:20px;cursor:pointer;z-index:3}
 .proj-timer{font-family:'Playfair Display',serif;font-weight:900;font-variant-numeric:tabular-nums;
