@@ -120,7 +120,7 @@ function renderCompo(){
       <tr><td>Corbeau (dernier indice)</td><td>${n <= 12 ? 'Recommandé (débutants)' : 'Optionnel'}</td></tr>
       <tr><td>Carte d'équilibrage</td><td>${t.carte && t.carte !== 'â€”' ? t.carte : '—'}</td></tr>
     </table>
-    <div class="tip">Répartition officielle pour ${n} convives (hors MJ). La table de 8 reçoit un Complice pour aplatir la courbe.</div>`;
+    <div class="tip">Répartition recommandée pour ${n} joueurs. Le Meneur ne compte pas dans ce total.</div>`;
 }
 
 /* ============ moteur de constructibilité (Cercle) ============ */
@@ -550,7 +550,7 @@ function renderDashboard(){
     </div>
     <div class="card">
       <h3 class="fic">Cartes Événement du Meneur</h3>
-      <p class="muted" style="font-size:13px">Soupapes de rééquilibrage — à jouer <b>une à la fois, avec parcimonie</b>, quand une table dérape.</p>
+      <p class="muted" style="font-size:13px">Soupapes de rééquilibrage, à jouer <b>une à la fois, avec parcimonie</b>, quand une table dérape.</p>
       <div id="evtBtns"></div>
     </div>
     <div class="card">
