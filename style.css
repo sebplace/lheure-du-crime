@@ -7,6 +7,7 @@
   --ink:#2a1d10; --ink-soft:#6a5230; --line:rgba(140,105,40,.38);
   --shadow:rgba(74,40,20,.14);
   --grain:.05;
+  --amb-veil:rgba(244,234,210,.86);
 }
 [data-theme="night"]{
   --ox:#c65b60; --ox-dp:#7a2a30; --gold:#c9a24a; --gold-lt:#e2c477;
@@ -14,6 +15,7 @@
   --ink:#ecdcc0; --ink-soft:#b79f7e; --line:rgba(201,162,74,.28);
   --shadow:rgba(0,0,0,.5);
   --grain:.09;
+  --amb-veil:rgba(15,12,20,.82);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -22,7 +24,13 @@ body{
   line-height:1.45; min-height:100vh; transition:background .4s,color .4s;
   background-image:
     radial-gradient(140% 90% at 50% -15%, color-mix(in srgb,var(--panel) 55%, transparent) 0%, transparent 60%),
-    radial-gradient(120% 120% at 50% 120%, color-mix(in srgb,var(--bg2) 90%, #000 6%) 0%, transparent 55%);
+    radial-gradient(120% 120% at 50% 120%, color-mix(in srgb,var(--bg2) 90%, #000 6%) 0%, transparent 55%),
+    linear-gradient(var(--amb-veil), var(--amb-veil)),
+    url('img/amb_pendule.webp');
+  background-repeat:no-repeat;
+  background-position:center, center, center, center;
+  background-size:cover;
+  background-attachment:fixed;
 }
 body::after{
   content:""; position:fixed; inset:0; pointer-events:none; z-index:1;
@@ -46,10 +54,10 @@ header.top{
 }
 header.top::before{
   content:""; position:absolute; top:0; right:0; bottom:0; width:min(42%,260px); z-index:0;
-  pointer-events:none; opacity:.10;
+  pointer-events:none; opacity:.16;
   background:url('img/amb_pendule.webp') right center/cover no-repeat;
-  -webkit-mask-image:linear-gradient(90deg, transparent, #000 65%);
-  mask-image:linear-gradient(90deg, transparent, #000 65%);
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 70%);
+  mask-image:linear-gradient(90deg, transparent, #000 70%);
 }
 header.top .clock, header.top h1, header.top .sub{position:relative; z-index:1}
 header .clock{width:46px;height:46px;margin:0 auto 2px;display:block;filter:drop-shadow(0 2px 6px var(--shadow))}
@@ -81,7 +89,7 @@ h2.sec{font-family:'Playfair Display',serif; color:var(--ox); font-size:19px; ma
   border-bottom:1px solid var(--line); padding-bottom:4px}
 h3.sub{font-family:'Cormorant Garamond',serif; color:var(--gold-lt); font-weight:700; font-size:16px; margin:12px 0 4px; letter-spacing:.02em}
 p{margin:6px 0}
-.card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:10px 0;
+.card{background:color-mix(in srgb, var(--panel) 90%, transparent); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:10px 0;
   box-shadow:0 3px 14px var(--shadow)}
 .muted{color:var(--ink-soft)} .ox{color:var(--ox)} .gold{color:var(--gold-lt)}
 label{font-family:'Cormorant Garamond',serif; font-weight:600; color:var(--ink-soft)}
@@ -146,7 +154,7 @@ tr:nth-child(even) td{background:color-mix(in srgb,var(--gold) 8%, transparent)}
 @keyframes flash{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
 
 /* ---------- BRIEF ---------- */
-.brief{background:var(--panel); border:1px solid var(--gold); border-radius:10px; padding:16px; margin:12px 0; box-shadow:0 4px 20px var(--shadow)}
+.brief{background:color-mix(in srgb, var(--panel) 90%, transparent); border:1px solid var(--gold); border-radius:10px; padding:16px; margin:12px 0; box-shadow:0 4px 20px var(--shadow)}
 .brief h3{margin-top:14px}
 .seedbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:13px}
 
