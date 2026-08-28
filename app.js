@@ -14,13 +14,13 @@ const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
 /* ============ état global ============ */
 let DATA = null, BYNUM = {}, NEUTRAL = [], LABELS = {};
 const LSK = 'hdc_mj_v3', LIBK = 'hdc_mj_lib_v3', CURK = 'hdc_mj_cur_v3';
-const store = Object.assign({ theme: 'day', sound: true, ambVol: 0.5, fontScale: 1 }, load(LSK));
+const store = Object.assign({ theme: 'day', sound: true, ambVol: 0.5, fontScale: 1, acc: {}, seenWelcome: false }, load(LSK));
 let LIB = load(LIBK) || [];
 let CURGAME = load(CURK) || null;
 
 function load(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
 function save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
-const persist = () => save(LSK, { theme: store.theme, sound: store.sound, ambVol: store.ambVol, fontScale: store.fontScale });
+const persist = () => save(LSK, { theme: store.theme, sound: store.sound, ambVol: store.ambVol, fontScale: store.fontScale, acc: store.acc, seenWelcome: store.seenWelcome });
 const persistCur = () => save(CURK, CURGAME);
 const persistLib = () => save(LIBK, LIB);
 
@@ -60,9 +60,9 @@ const COMP_WHY = [
 fetch('data.json').then(r => r.json()).then(d => {
   DATA = d; NEUTRAL = d.neutral_dims; LABELS = d.labels;
   d.cast.forEach(c => BYNUM[c.num] = c);
-  initTheme(); initTabs(); initHeader(); initTable(); initPartie(); initClock(); initBoite(); initAmbiance(); initA11y(); registerSW();
+  initTheme(); initTabs(); initHeader(); initTable(); initPartie(); initClock(); initBoite(); initAmbiance(); initA11y(); initStatus(); initCastFilter(); registerSW();
   renderLibrary(); renderDashboard(); renderRoles();
-  handleHash();
+  handleHash(); maybeWelcome();
 }).catch(e => { document.querySelector('main').innerHTML = '<p class="warn">Impossible de charger les données du jeu.</p>'; console.error(e); });
 
 /* ============ thème / son / onglets / header ============ */
@@ -78,6 +78,7 @@ function initTabs(){
     if (b.dataset.tab === 'enjeu') renderDashboard();
     if (b.dataset.tab === 'roles') renderRoles();
     if (b.dataset.tab === 'boite') refreshBoiteGame();
+    paintStatus();
     window.scrollTo(0, 0);
   });
 }
@@ -467,6 +468,8 @@ function ensureLive(g){
   if (!g.live) g.live = { accused: [], secondVictim: null, condemned: null, obj: {}, lastAccused: null };
   if (!Array.isArray(g.live.accused)) g.live.accused = [];
   if (!g.live.obj) g.live.obj = {};
+  if (g.live.vivants == null) g.live.vivants = g.present.length;
+  if (g.live.notes == null) g.live.notes = '';
   if (g.vengeurCible === undefined) g.vengeurCible = (g.players.find(p => p.atout === 'Le Vengeur') || {}).cible ?? null;
 }
 const OBJ_BYNAME = nm => DATA.atouts.find(a => a.nom === nm);
@@ -524,8 +527,12 @@ function renderDashboard(){
       </div>
     </div>
     <div class="card">
-      <h3 class="fic">Aide au vote</h3>
-      <div class="rowflex"><label>Votants vivants : <input id="voteN" type="number" min="2" max="20" value="${vivants}" style="width:70px"></label><button class="ghost" id="voteCalc">Majorité ?</button><span id="voteOut" class="muted"></span></div>
+      <h3 class="fic">Vivants & majorité</h3>
+      <div class="rowflex"><span class="k">Votants vivants</span>
+        <div class="mini-ctl"><button data-vv="-">−</button></div>
+        <b id="vivN" style="font-size:20px;min-width:28px;text-align:center">${g.live.vivants}</b>
+        <div class="mini-ctl"><button data-vv="+">+</button></div></div>
+      <p class="tip" id="vivOut"></p>
     </div>
     <div class="card">
       <h3 class="fic">Accusation & verdict</h3>
@@ -551,39 +558,52 @@ function renderDashboard(){
       <div class="rowflex"><button class="ghost" id="evCarillon">🔔 Carillon</button></div>
       <div id="journalOut" style="margin-top:8px"></div>
     </div>
+    <div class="card">
+      <h3 class="fic">Notes du Meneur</h3>
+      <textarea id="mjNotes" rows="3" placeholder="Vos notes libres pour cette partie…" style="width:100%;resize:vertical"></textarea>
+    </div>
     <div class="rowflex">
       <button class="act big-act" id="denouementBtn">🎭 Dénouement</button>
       <button class="ghost" id="resetSession">↻ Réinitialiser la session</button>
     </div>`;
   // compteurs
-  box.querySelectorAll('.mini-ctl button').forEach(b => b.onclick = () => {
+  box.querySelectorAll('.dash-mini .mini-ctl button').forEach(b => b.onclick = () => {
     const a = b.dataset.a;
+    pushUndo(g, 'compteur');
     if (a === 'act-') g.acts = Math.max(0, g.acts - 1); if (a === 'act+') g.acts++;
     if (a === 'tour-') g.tour = Math.max(1, g.tour - 1); if (a === 'tour+') g.tour++;
-    persistCur(); $('#dActs').textContent = g.acts; $('#dTour').textContent = g.tour; $('#nextClue') && ($('#nextClue').textContent = 'Indice du tour ' + g.tour);
+    persistCur(); $('#dActs').textContent = g.acts; $('#dTour').textContent = g.tour; $('#nextClue') && ($('#nextClue').textContent = 'Indice du tour ' + g.tour); paintStatus();
   });
-  renderOuverture(g); renderWall(g); renderJournal(g); renderObjTrack(g); renderVerdict(g); renderEvents(g);
+  renderOuverture(g); renderWall(g); renderJournal(g); renderObjTrack(g); renderVerdict(g); renderEvents(g); renderVivants(g);
+  $('#mjNotes').value = g.live.notes || '';
+  $('#mjNotes').oninput = e => { g.live.notes = e.target.value; persistCur(); };
+  box.querySelectorAll('[data-vv]').forEach(b => b.onclick = () => { pushUndo(g, 'vivants'); const d = b.dataset.vv === '+' ? 1 : -1; g.live.vivants = Math.max(1, (g.live.vivants || g.present.length) + d); persistCur(); renderVivants(g); });
   $('#fxGo').onclick = () => { const num = +$('#fxNum').value; const c = BYNUM[num]; $('#fxOut').innerHTML = c ? `<b>${esc(c.nom)}</b> — ${Object.keys(LABELS).map(d => LABELS[d] + ' : <b>' + esc(c.pub[d]) + '</b>').join(' · ')}` : 'Inconnu.'; };
   $('#clueAdd').onclick = () => { const v = $('#clueIn').value.trim(); if (v){ g.clues.push(v); $('#clueIn').value = ''; persistCur(); renderWall(g); } };
   $('#nextClue').onclick = () => { const tt = g.indices.find(x => x.tour === g.tour); if (tt) tt.items.forEach(it => g.clues.push('[T' + g.tour + '] ' + it.t)); persistCur(); renderWall(g); };
   $('#projFromDash').onclick = () => openProjection();
-  $('#voteCalc').onclick = () => { const n = +$('#voteN').value; const maj = Math.floor((n - 1) / 2) + 1; $('#voteOut').textContent = `Il faut ${maj} voix sur ${n - 1} (l'accusé·e ne vote pas). Égalité → pas d'arrestation.`; };
   $('#doAccuse').onclick = () => {
-    const num = +$('#accuseWho').value; maillet(); haptic(30);
+    const num = +$('#accuseWho').value; pushUndo(g, 'accusation'); maillet(); haptic(30);
     if (!g.live.accused.includes(num)) g.live.accused.push(num);
     g.live.lastAccused = num; g.acts = Math.max(0, g.acts - 1); $('#dActs').textContent = g.acts;
     journal(g, '⚖️ ' + nomCourt(num) + ' est formellement accusé·e (un Acte consommé).');
-    persistCur(); renderVerdict(g); renderObjTrack(g);
+    persistCur(); renderVerdict(g); renderObjTrack(g); paintStatus();
   };
   $('#doKill').onclick = () => {
-    const num = +$('#killWho').value; glas(); haptic([40, 60, 40]);
-    g.live.secondVictim = num;
+    const num = +$('#killWho').value; pushUndo(g, 'second meurtre'); glas(); haptic([40, 60, 40]);
+    g.live.secondVictim = num; g.live.vivants = Math.max(1, (g.live.vivants || g.present.length) - 1);
     journal(g, '🕯️ Second meurtre : ' + nomCourt(num) + ' est la victime (Fantôme).' + (num === g.vengeurCible ? ' — vendetta du Vengeur accomplie.' : ''));
-    persistCur(); renderObjTrack(g);
+    persistCur(); renderObjTrack(g); renderVivants(g);
   };
   $('#evCarillon').onclick = () => carillon();
   $('#denouementBtn').onclick = () => openDenouement(g);
-  $('#resetSession').onclick = () => { if (confirm('Réinitialiser la session en cours ?')){ g.acts = (DATA.table.find(t => t.n === g.n) || { actes: 2 }).actes; g.tour = 1; g.clues = []; g.journal = []; g.ouverture = []; g.live = null; ensureLive(g); persistCur(); renderDashboard(); } };
+  $('#resetSession').onclick = () => { if (confirm('Réinitialiser la session en cours ?')){ g.acts = (DATA.table.find(t => t.n === g.n) || { actes: 2 }).actes; g.tour = 1; g.clues = []; g.journal = []; g.ouverture = []; g.live = null; ensureLive(g); UNDO = []; persistCur(); renderDashboard(); } };
+  makeAccordion(box); paintStatus();
+}
+function renderVivants(g){
+  const b = $('#vivN'); if (!b) return; b.textContent = g.live.vivants;
+  const n = g.live.vivants, maj = Math.floor((n - 1) / 2) + 1;
+  const o = $('#vivOut'); if (o) o.innerHTML = `Majorité : <b>${maj}</b> voix sur ${n - 1} (l'accusé·e ne vote pas). Égalité → pas d'arrestation.`;
 }
 function renderVerdict(g){
   const box = $('#verdictBox'); if (!box) return;
@@ -594,7 +614,7 @@ function renderVerdict(g){
     <button class="act" data-v="cond">🔨 Condamné·e (arrêté·e)</button></p>
     <p class="muted" style="font-size:13px">${g.live.condemned != null ? 'Condamné·e cette partie : <b>' + esc(nomCourt(g.live.condemned)) + '</b> — ' + (g.live.condemned === g.coupable ? 'le vrai Coupable ! (Enquêteurs)' : 'une erreur judiciaire (Malfaiteurs)') : ''}</p>`;
   box.querySelector('[data-v="acq"]').onclick = () => { journal(g, '⚖️ ' + nomCourt(num) + ' est acquitté·e.'); persistCur(); };
-  box.querySelector('[data-v="cond"]').onclick = () => { g.live.condemned = num; maillet(); journal(g, '🔨 ' + nomCourt(num) + ' est condamné·e et arrêté·e.'); persistCur(); renderVerdict(g); };
+  box.querySelector('[data-v="cond"]').onclick = () => { pushUndo(g, 'verdict'); g.live.condemned = num; maillet(); journal(g, '🔨 ' + nomCourt(num) + ' est condamné·e et arrêté·e.'); persistCur(); renderVerdict(g); };
 }
 function renderObjTrack(g){
   const box = $('#objTrack'); if (!box) return;
@@ -782,6 +802,7 @@ function paintClock(){
   $('#timer').textContent = fmt(clk.sec); $('#timer').classList.toggle('low', low);
   $('#phaseName').textContent = PHASES[clk.phase].n;
   if ($('#projTimer')){ $('#projTimer').textContent = fmt(clk.sec); $('#projTimer').classList.toggle('low', low); $('#projPhase').textContent = PHASES[clk.phase].n; }
+  paintStatus();
 }
 function tick(){ if (!clk.run) return; clk.sec--; if (clk.sec <= 0){ clk.sec = 0; clk.run = false; clearInterval(clk.id); carillon(); } paintClock(); }
 async function wakeOn(){ try { if ('wakeLock' in navigator) clk.wake = await navigator.wakeLock.request('screen'); } catch {} }
@@ -854,6 +875,72 @@ function initA11y(){
     else if (e.key === 'ArrowUp'){ e.preventDefault(); $('#plus1').click(); }
     else if (e.key === 'ArrowDown'){ e.preventDefault(); $('#minus1').click(); }
   });
+}
+
+/* ============ barre d'état + undo + accordéon + guide ============ */
+let UNDO = [];
+function pushUndo(g, label){ if (!g) return; UNDO.push({ label, snap: JSON.stringify({ acts: g.acts, tour: g.tour, live: g.live }) }); if (UNDO.length > 25) UNDO.shift(); paintStatus(); }
+function undo(){ const g = CURGAME; if (!g || !UNDO.length) return; const u = UNDO.pop(); try { const s = JSON.parse(u.snap); g.acts = s.acts; g.tour = s.tour; g.live = s.live; } catch {} persistCur(); renderDashboard(); paintStatus(); toast('Annulé : ' + u.label); }
+
+function paintStatus(){
+  const sb = $('#statusbar'); if (!sb) return;
+  const g = CURGAME; const show = !!(g && g.players);
+  sb.hidden = !show; if (!show) return;
+  $('#sbActs').textContent = g.acts; $('#sbTour').textContent = g.tour;
+  $('#sbTime').textContent = fmt(clk.sec); $('#sbTime').classList.toggle('low', clk.sec <= 30);
+  $('#sbPhase').textContent = PHASES[clk.phase].n;
+  $('#sbPlay').textContent = clk.run ? '⏸' : '▶';
+  const u = $('#sbUndo'); if (u) u.hidden = !UNDO.length;
+}
+function initStatus(){
+  $('#sbPlay').onclick = () => { $('#startBtn').click(); paintStatus(); };
+  $('#sbClock').onclick = () => goTab('horloge');
+  $('#sbUndo').onclick = () => undo();
+  $$('#statusbar .sb-jump').forEach(b => b.onclick = () => goTab(b.dataset.jump));
+  paintStatus();
+}
+
+function makeAccordion(container){
+  container.querySelectorAll('.card').forEach(card => {
+    const h = card.querySelector('h3.fic'); if (!h || card.classList.contains('acc')) return;
+    card.classList.add('acc');
+    const id = h.textContent.trim().slice(0, 24); card.dataset.acc = id;
+    const body = el('div', 'acc-body'); let n = h.nextSibling; while (n){ const nx = n.nextSibling; body.appendChild(n); n = nx; }
+    card.appendChild(body); h.classList.add('acc-h');
+    const chev = el('span', 'acc-chev', '▾'); h.appendChild(chev);
+    card.classList.toggle('collapsed', store.acc[id] === false);
+    h.onclick = () => { card.classList.toggle('collapsed'); store.acc[id] = !card.classList.contains('collapsed'); persist(); };
+  });
+}
+
+function initCastFilter(){
+  const dim = $('#castDim'), val = $('#castVal'); if (!dim) return;
+  Object.keys(LABELS).forEach(d => dim.appendChild(new Option(LABELS[d], d)));
+  const fillVals = () => { const d = dim.value; const vals = [...new Set(DATA.cast.map(c => c.pub[d]))].sort(); val.innerHTML = ''; vals.forEach(v => val.appendChild(new Option(v, v))); render(); };
+  const render = () => {
+    const d = dim.value, v = val.value; const list = DATA.cast.filter(c => c.pub[d] === v);
+    $('#castCount').textContent = list.length + ' personnage(s)';
+    $('#castOut').innerHTML = list.map(c => `<div class="prow" style="padding:4px 0"><div class="who"><b>${esc(nomCourt(c.num))}</b> — ${esc(c.role)}</div></div>`).join('') || '<p class="empty">Aucun.</p>';
+  };
+  dim.onchange = fillVals; val.onchange = render; fillVals();
+}
+
+function maybeWelcome(){ if (!store.seenWelcome) showWelcome(); }
+function showWelcome(){
+  let ov = $('#welcome'); if (!ov){ ov = el('div', 'modal'); ov.id = 'welcome'; document.body.appendChild(ov); }
+  ov.innerHTML = `<div class="modal-box">
+    <h2>Bienvenue, Meneur de Jeu</h2>
+    <p class="muted">Votre console pour <b>L'Heure du Crime</b>, en trois gestes :</p>
+    <ol class="wsteps">
+      <li><b>① Composez</b> — onglet <b>Partie</b> : 🎲 Générer (ou un scénario).</li>
+      <li><b>② Distribuez</b> — onglet <b>Rôles</b> : tendez à chacun sa fiche (lien / QR).</li>
+      <li><b>③ Menez</b> — onglet <b>En jeu</b> : compteurs, indices, accusation, Dénouement. La barre du haut suit toujours l'état.</li>
+    </ol>
+    <p class="tip">Installable et hors-ligne. Réglages & aide dans l'onglet <b>Aide</b>.</p>
+    <div class="rowflex" style="justify-content:center;margin-top:10px"><button class="act big-act" id="wStart">Commencer</button></div>
+  </div>`;
+  ov.classList.add('on');
+  $('#wStart').onclick = () => { store.seenWelcome = true; persist(); ov.classList.remove('on'); };
 }
 
 /* ============ service worker ============ */

@@ -234,6 +234,43 @@ img.avatar{object-fit:cover;object-position:center 30%}
 .obj-set button{width:30px;height:30px;padding:0;border-radius:6px}
 .evt-btn{display:block;width:100%;text-align:left;margin:4px 0}
 
+/* ---------- v7 : barre d'état, accordéon, guide, notes ---------- */
+.statusbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:7px 12px;background:color-mix(in srgb,var(--ox) 92%, #000 4%);color:#fdf6e6;
+  box-shadow:0 3px 10px var(--shadow);font-size:14px}
+.statusbar[hidden]{display:none}
+.statusbar .sb-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;
+  width:34px;height:32px;border-radius:8px;cursor:pointer;font-size:15px;display:inline-flex;align-items:center;justify-content:center}
+.statusbar .sb-btn:hover{background:rgba(255,255,255,.26)}
+.statusbar .sb-time{background:none;border:0;color:#f4c86a;font-family:'Playfair Display',serif;font-weight:800;
+  font-variant-numeric:tabular-nums;font-size:19px;cursor:pointer;padding:0 2px}
+.statusbar .sb-time.low{color:#ffb3ab}
+.statusbar #sbPhase{font-family:'Cormorant Garamond',serif;font-style:italic;color:#e9d9b6}
+.statusbar .sb-sep{flex:1}
+.statusbar .sb-item{background:none;border:0;color:#fdf6e6;font:inherit;cursor:default;padding:2px 4px}
+.statusbar .sb-jump{cursor:pointer;border-radius:6px}
+.statusbar .sb-jump:hover{background:rgba(255,255,255,.14)}
+.statusbar .sb-item b{color:#f4c86a;font-family:'Playfair Display',serif}
+.statusbar .sb-undo{background:rgba(255,255,255,.2)}
+
+.acc .acc-h{cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;transition:color .15s}
+.acc .acc-h:hover{color:var(--ox)}
+.acc .acc-chev{transition:transform .2s;font-size:12px;opacity:.7;margin-left:8px}
+.acc.collapsed .acc-chev{transform:rotate(-90deg)}
+.acc.collapsed .acc-body{display:none}
+textarea{font-family:'EB Garamond',Georgia,serif;font-size:14px;padding:8px 10px;border:1px solid var(--line);
+  border-radius:8px;background:var(--panel);color:var(--ink)}
+
+.modal{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;
+  background:rgba(20,12,10,.55);backdrop-filter:blur(3px);padding:16px}
+.modal.on{display:flex}
+.modal-box{max-width:440px;width:100%;background:var(--panel);border:1px solid var(--gold);border-radius:14px;
+  padding:20px 22px;box-shadow:0 12px 48px rgba(0,0,0,.4);text-align:left;animation:denofade .3s ease}
+.modal-box h2{font-family:'Playfair Display',serif;color:var(--ox);margin:.1em 0 .3em}
+.wsteps{list-style:none;padding:0;margin:10px 0}
+.wsteps li{margin:8px 0;padding-left:2px;line-height:1.5}
+.card{transition:box-shadow .15s}
+
 /* ---------- Feuille de distribution ---------- */
 .sheet{position:fixed;inset:0;z-index:100;display:none;background:#fbf6ea;color:#241a10;overflow:auto;padding:18px}
 .sheet.on{display:block}
@@ -258,6 +295,8 @@ img.avatar{object-fit:cover;object-position:center 30%}
   table{font-size:13.5px}
   th,td{padding:6px 7px}
   .dash-top{grid-template-columns:1fr}
+  .statusbar{gap:6px;padding:6px 9px;font-size:13px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap}
+  .statusbar .sb-time{font-size:17px}
 }
 @media (min-width:641px) and (max-width:980px){ main{max-width:92%} }
 

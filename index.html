@@ -45,6 +45,16 @@
   <button data-tab="aide">Aide</button>
 </nav>
 
+<div id="statusbar" class="statusbar" hidden>
+  <button id="sbPlay" class="sb-btn" title="Démarrer / mettre en pause le minuteur">▶</button>
+  <button id="sbClock" class="sb-time" title="Aller à l'Horloge"><span id="sbTime">10:00</span></button>
+  <span class="sb-item" id="sbPhaseWrap"><span id="sbPhase">Audience</span></span>
+  <span class="sb-sep"></span>
+  <button class="sb-item sb-jump" data-jump="enjeu" title="Aller à En jeu">Actes&nbsp;<b id="sbActs">–</b></button>
+  <button class="sb-item sb-jump" data-jump="enjeu" title="Aller à En jeu">Tour&nbsp;<b id="sbTour">–</b></button>
+  <button id="sbUndo" class="sb-btn sb-undo" title="Annuler la dernière action" hidden>↶</button>
+</div>
+
 <main>
   <!-- TABLE -->
   <section id="table" class="panel active">
@@ -159,6 +169,15 @@
     <h2 class="sec">Difficulté avancée</h2>
     <p>Coupez le Corbeau · armez les Complices (Maquilleur, Étouffeur, Faussaire, Usurpateur) · fausses
       pistes serrées · un Intrigant comme leurre · retirez le levier d'Alibi.</p>
+    <h2 class="sec">Consulter le casting</h2>
+    <p class="muted">Pour arbitrer une contestation : filtrez les personnages par trait public.</p>
+    <div class="rowflex">
+      <label>Trait : <select id="castDim"></select></label>
+      <label>Valeur : <select id="castVal"></select></label>
+      <span class="muted" id="castCount"></span>
+    </div>
+    <div id="castOut" style="margin-top:6px"></div>
+
     <h2 class="sec">Réglages & accessibilité</h2>
     <div class="rowflex">
       <span>Taille d'affichage :</span>
