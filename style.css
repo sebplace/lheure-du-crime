@@ -232,6 +232,7 @@ img.avatar{object-fit:cover;object-position:center 30%}
 @keyframes denofade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .obj-set{display:flex;gap:3px;margin-left:auto}
 .obj-set button{width:30px;height:30px;padding:0;border-radius:6px}
+.evt-btn{display:block;width:100%;text-align:left;margin:4px 0}
 
 /* ---------- Feuille de distribution ---------- */
 .sheet{position:fixed;inset:0;z-index:100;display:none;background:#fbf6ea;color:#241a10;overflow:auto;padding:18px}

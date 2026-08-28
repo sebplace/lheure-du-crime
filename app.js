@@ -454,6 +454,14 @@ const OUVERTURE = [
   'Distribuer perso, Atout et 2 Rumeurs à chacun', 'Distribuer une carte Secret par joueur',
   'Placer la victime, annoncer le crime', 'Lire l\'ambiance et lancer le 1ᵉʳ tour',
 ];
+const EVENTS = [
+  { icon: '🕯️', nom: 'Coupure de gaz', camp: 'malf', effet: 'La prochaine Audience ne révèle aucun indice.' },
+  { icon: '🌑', nom: 'Le noir complet', camp: 'malf', effet: 'Ce tour, un Atout d\'information (au choix) échoue.' },
+  { icon: '🔪', nom: 'Un cri dans la nuit', camp: 'malf', effet: 'Retirez un Enquêteur : meurtre silencieux, sans indice de Fantôme (−1 votant, −1 canal d\'info).' },
+  { icon: '✉️', nom: 'La lettre anonyme', camp: 'enq', effet: 'Une révélation gratuite (question type Médium : « ce joueur est-il impliqué ? »).' },
+  { icon: '🛏️', nom: 'L\'aveu sur l\'oreiller', camp: 'enq', effet: 'Le MJ ajoute une carte Indice au mur.' },
+  { icon: '⛈️', nom: 'L\'orage éclate', camp: 'neutre', effet: 'Ambiance (option : raccourcit la phase suivante).' },
+];
 function ensureLive(g){
   if (!g) return;
   if (!g.live) g.live = { accused: [], secondVictim: null, condemned: null, obj: {}, lastAccused: null };
@@ -534,6 +542,11 @@ function renderDashboard(){
       <div id="objTrack"></div>
     </div>
     <div class="card">
+      <h3 class="fic">Cartes Événement du Meneur</h3>
+      <p class="muted" style="font-size:13px">Soupapes de rééquilibrage — à jouer <b>une à la fois, avec parcimonie</b>, quand une table dérape.</p>
+      <div id="evtBtns"></div>
+    </div>
+    <div class="card">
       <h3 class="fic">Événements & journal</h3>
       <div class="rowflex"><button class="ghost" id="evCarillon">🔔 Carillon</button></div>
       <div id="journalOut" style="margin-top:8px"></div>
@@ -549,7 +562,7 @@ function renderDashboard(){
     if (a === 'tour-') g.tour = Math.max(1, g.tour - 1); if (a === 'tour+') g.tour++;
     persistCur(); $('#dActs').textContent = g.acts; $('#dTour').textContent = g.tour; $('#nextClue') && ($('#nextClue').textContent = 'Indice du tour ' + g.tour);
   });
-  renderOuverture(g); renderWall(g); renderJournal(g); renderObjTrack(g); renderVerdict(g);
+  renderOuverture(g); renderWall(g); renderJournal(g); renderObjTrack(g); renderVerdict(g); renderEvents(g);
   $('#fxGo').onclick = () => { const num = +$('#fxNum').value; const c = BYNUM[num]; $('#fxOut').innerHTML = c ? `<b>${esc(c.nom)}</b> — ${Object.keys(LABELS).map(d => LABELS[d] + ' : <b>' + esc(c.pub[d]) + '</b>').join(' · ')}` : 'Inconnu.'; };
   $('#clueAdd').onclick = () => { const v = $('#clueIn').value.trim(); if (v){ g.clues.push(v); $('#clueIn').value = ''; persistCur(); renderWall(g); } };
   $('#nextClue').onclick = () => { const tt = g.indices.find(x => x.tour === g.tour); if (tt) tt.items.forEach(it => g.clues.push('[T' + g.tour + '] ' + it.t)); persistCur(); renderWall(g); };
@@ -594,6 +607,17 @@ function renderObjTrack(g){
       <span class="obj-set" data-num="${p.num}"><button class="ghost" data-r="ok" title="Réussi">✓</button><button class="ghost" data-r="ko" title="Raté">✗</button><button class="ghost" data-r="auto" title="Auto">↺</button></span></div>`;
   }).join('');
   box.querySelectorAll('.obj-set').forEach(sp => { const num = +sp.dataset.num; sp.querySelectorAll('button').forEach(b => b.onclick = () => { const r = b.dataset.r; if (r === 'auto') delete g.live.obj[num]; else g.live.obj[num] = r; persistCur(); renderObjTrack(g); }); });
+}
+function renderEvents(g){
+  const box = $('#evtBtns'); if (!box) return;
+  const cls = c => c === 'malf' ? 'malf' : c === 'enq' ? 'enq' : 'intr';
+  box.innerHTML = EVENTS.map((e, i) => `<button class="ghost evt-btn" data-i="${i}" title="${esc(e.effet)}">${e.icon} ${esc(e.nom)} <span class="tag ${cls(e.camp)}" style="margin-left:4px">${e.camp === 'malf' ? 'Malf' : e.camp === 'enq' ? 'Enq' : 'Amb.'}</span></button>`).join('');
+  box.querySelectorAll('.evt-btn').forEach(b => b.onclick = () => {
+    const e = EVENTS[+b.dataset.i];
+    journal(g, '🎴 Événement : ' + e.icon + ' ' + e.nom + ' — ' + e.effet);
+    toast(e.icon + ' ' + e.nom); haptic(20);
+    if (e.nom === 'L\'orage éclate') ambPlay('orage');
+  });
 }
 function openDenouement(g){
   ensureLive(g);
