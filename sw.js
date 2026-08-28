@@ -1,5 +1,5 @@
 /* Service Worker — L'Heure du Crime, Console MJ (offline-first) */
-const CACHE = 'hdc-mj-v13';
+const CACHE = 'hdc-mj-v14';
 const ASSETS = ['./','./index.html','./style.css','./app.js','./data.json','./favicon.svg','./manifest.json','./vendor/qrcode.js','./audio/horloge.ogg','./audio/orage.ogg','./img/amb_manoir.webp','./img/amb_pendule.webp'];
 
 self.addEventListener('install', e => {
