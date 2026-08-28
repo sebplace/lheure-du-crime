@@ -129,6 +129,7 @@
     <h2 class="sec">Ambiance sonore</h2>
     <div class="amb-bar">
       <button class="ghost amb-btn" data-amb="horloge">🕰️ Horloge</button>
+      <button class="ghost amb-btn" data-amb="feu">🔥 Cheminée</button>
       <button class="ghost amb-btn" data-amb="orage">🌧️ Orage</button>
       <button class="ghost amb-btn" data-amb="">🔇 Silence</button>
       <label class="amb-vol">Volume <input type="range" id="ambVol" min="0" max="100" value="50"></label>
@@ -202,6 +203,7 @@
 
 <!-- PROJECTION plein écran -->
 <div id="projection" class="projection">
+  <div class="proj-candle" aria-hidden="true"></div>
   <button class="proj-close" id="projClose">✕</button>
   <div class="proj-timer" id="projTimer">10:00</div>
   <div class="proj-phase" id="projPhase">Audience</div>

@@ -283,6 +283,24 @@ textarea{font-family:'EB Garamond',Georgia,serif;font-size:14px;padding:8px 10px
 .sheet-qr svg{width:100%;height:100%}
 .sheet-info b{color:#4a141a}
 
+/* ---------- v8 : bouclier anti-spoiler, comparateur, bougie ---------- */
+#confidCard{border-color:var(--ox);box-shadow:0 3px 14px var(--shadow),inset 3px 0 0 var(--ox)}
+.reveal-btn{font-size:13px;padding:4px 12px;margin:0 0 8px}
+.secret-veil{filter:blur(7px);transition:filter .25s;user-select:none;-webkit-user-select:none;position:relative}
+.secret-veil.shown{filter:none;user-select:auto;-webkit-user-select:auto}
+.secret-veil::after{content:"🔒 masqué";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--ink-soft);letter-spacing:.05em;pointer-events:none;opacity:.85}
+.secret-veil.shown::after{display:none}
+table.cmp{margin-top:6px} table.cmp td,table.cmp th{font-size:13.5px;padding:5px 8px}
+table.cmp tr.cmp-eq td{background:color-mix(in srgb,var(--gold) 22%, transparent);font-weight:600}
+.proj-candle{position:absolute;inset:0;pointer-events:none;z-index:0;mix-blend-mode:screen;
+  background:radial-gradient(58% 46% at 50% 40%, rgba(232,182,92,.17), transparent 72%);
+  animation:candle 4.6s ease-in-out infinite}
+.projection>*:not(.proj-candle){position:relative;z-index:1}
+@keyframes candle{0%,100%{opacity:.55;transform:scale(1)}22%{opacity:.78;transform:scale(1.015)}
+  46%{opacity:.48;transform:scale(.997)}68%{opacity:.82;transform:scale(1.01)}84%{opacity:.6}}
+@media (prefers-reduced-motion:reduce){.proj-candle{animation:none;opacity:.6}}
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width:640px){
   header.top{padding:16px 10px 8px}

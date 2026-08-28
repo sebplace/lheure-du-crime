@@ -502,14 +502,17 @@ function renderDashboard(){
       <div class="dash-mini"><div class="k">Actes restants</div><div class="v" id="dActs">${g.acts}</div><div class="mini-ctl"><button data-a="act-">−</button><button data-a="act+">+</button></div></div>
       <div class="dash-mini"><div class="k">Tour d'enquête</div><div class="v" id="dTour">${g.tour}</div><div class="mini-ctl"><button data-a="tour-">−</button><button data-a="tour+">+</button></div></div>
     </div>
-    <div class="card">
+    <div class="card" id="confidCard">
       <h3 class="fic">Rappel confidentiel</h3>
-      <p>Coupable : <b>${nomCourt(g.coupable)}</b> · Leurres : ${g.leurres.map(nomCourt).join(', ')}.</p>
-      <p class="muted">Mobile : ${esc(g.mobile)}.</p>
+      <button class="ghost reveal-btn" id="revealSecret" type="button">👁 Révéler</button>
+      <div class="secret-veil" id="secretVeil">
+        <p>Coupable : <b>${nomCourt(g.coupable)}</b> · Leurres : ${g.leurres.map(nomCourt).join(', ')}.</p>
+        <p class="muted">Mobile : ${esc(g.mobile)}.</p>
+      </div>
     </div>
     <div class="card">
-      <h3 class="fic">Fiche express</h3>
-      <div class="rowflex"><label>N° : <input id="fxNum" type="number" min="1" max="40" list="presentList" style="width:80px"></label><button class="ghost" id="fxGo">Traits</button></div>
+      <h3 class="fic">Fiche express &amp; comparateur</h3>
+      <div class="rowflex"><label>N° : <input id="fxNum" type="number" min="1" max="40" list="presentList" style="width:78px"></label><label>comparer à : <input id="fxNum2" type="number" min="1" max="40" list="presentList" style="width:78px"></label><button class="ghost" id="fxGo">Voir</button></div>
       <datalist id="presentList">${g.present.map(num => `<option value="${num}">${esc(nomCourt(num))}</option>`).join('')}</datalist>
       <div id="fxOut" class="muted" style="margin-top:6px;font-size:14px"></div>
     </div>
@@ -578,7 +581,18 @@ function renderDashboard(){
   $('#mjNotes').value = g.live.notes || '';
   $('#mjNotes').oninput = e => { g.live.notes = e.target.value; persistCur(); };
   box.querySelectorAll('[data-vv]').forEach(b => b.onclick = () => { pushUndo(g, 'vivants'); const d = b.dataset.vv === '+' ? 1 : -1; g.live.vivants = Math.max(1, (g.live.vivants || g.present.length) + d); persistCur(); renderVivants(g); });
-  $('#fxGo').onclick = () => { const num = +$('#fxNum').value; const c = BYNUM[num]; $('#fxOut').innerHTML = c ? `<b>${esc(c.nom)}</b> — ${Object.keys(LABELS).map(d => LABELS[d] + ' : <b>' + esc(c.pub[d]) + '</b>').join(' · ')}` : 'Inconnu.'; };
+  const rv = $('#revealSecret'), veil = $('#secretVeil');
+  if (rv && veil) rv.onclick = () => { const on = veil.classList.toggle('shown'); rv.textContent = on ? '🙈 Masquer' : '👁 Révéler'; };
+  $('#fxGo').onclick = () => {
+    const n1 = +$('#fxNum').value, n2 = +$('#fxNum2').value;
+    const a = BYNUM[n1]; if (!a){ $('#fxOut').innerHTML = 'Inconnu.'; return; }
+    const b = n2 && n2 !== n1 ? BYNUM[n2] : null;
+    if (!b){ $('#fxOut').innerHTML = `<b>${esc(a.nom)}</b> — ${Object.keys(LABELS).map(d => LABELS[d] + ' : <b>' + esc(a.pub[d]) + '</b>').join(' · ')}`; return; }
+    const rows = Object.keys(LABELS).map(d => { const eq = a.pub[d] === b.pub[d]; return `<tr class="${eq ? 'cmp-eq' : ''}"><td>${LABELS[d]}</td><td>${esc(a.pub[d])}</td><td>${esc(b.pub[d])}</td><td style="text-align:center">${eq ? '=' : ''}</td></tr>`; }).join('');
+    const flous = Object.keys(LABELS).filter(d => a.pub[d] === b.pub[d] && NEUTRAL.includes(d)).length;
+    $('#fxOut').innerHTML = `<table class="cmp"><tr><th>Trait</th><th>${esc(nomCourt(n1))}</th><th>${esc(nomCourt(n2))}</th><th></th></tr>${rows}</table>
+      <p class="muted" style="margin-top:4px">${flous} trait(s) public(s) flou(s) en commun ${flous >= 2 ? '— un Cercle peut les réunir.' : '— insuffisant pour les isoler ensemble.'}</p>`;
+  };
   $('#clueAdd').onclick = () => { const v = $('#clueIn').value.trim(); if (v){ g.clues.push(v); $('#clueIn').value = ''; persistCur(); renderWall(g); } };
   $('#nextClue').onclick = () => { const tt = g.indices.find(x => x.tour === g.tour); if (tt) tt.items.forEach(it => g.clues.push('[T' + g.tour + '] ' + it.t)); persistCur(); renderWall(g); };
   $('#projFromDash').onclick = () => openProjection();
@@ -842,18 +856,47 @@ function handleHash(){
   }
 }
 
-/* ============ ambiance sonore (boucles) ============ */
+/* ============ ambiance sonore (boucles + feu synthétisé) ============ */
 const AMB = { el: null, cur: null };
+const FIRE = { on: false, nodes: [], gain: null, timer: null };
+function fireVol(){ return store.ambVol != null ? store.ambVol : 0.5; }
+function fireStart(){
+  if (FIRE.on) return; const c = ac(), sr = c.sampleRate;
+  const buf = c.createBuffer(1, sr * 3, sr), d = buf.getChannelData(0);
+  let last = 0; for (let i = 0; i < d.length; i++){ const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+  const src = c.createBufferSource(); src.buffer = buf; src.loop = true;
+  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420;
+  const g = c.createGain(); g.gain.value = fireVol() * 0.6;
+  src.connect(lp).connect(g).connect(c.destination); src.start();
+  FIRE.nodes = [src]; FIRE.gain = g; FIRE.on = true;
+  const crack = () => {
+    if (!FIRE.on) return; const t = c.currentTime, len = 0.05 + Math.random() * 0.06;
+    const cb = c.createBuffer(1, Math.ceil(sr * len), sr), cd = cb.getChannelData(0);
+    for (let i = 0; i < cd.length; i++) cd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / cd.length, 2);
+    const o = c.createBufferSource(); o.buffer = cb;
+    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 800 + Math.random() * 2200; bp.Q.value = 0.7;
+    const cg = c.createGain(); cg.gain.value = fireVol() * (0.3 + Math.random() * 0.5);
+    o.connect(bp).connect(cg).connect(c.destination); o.start(t); o.stop(t + len + 0.02);
+    FIRE.timer = setTimeout(crack, 120 + Math.random() * 520);
+  };
+  crack();
+}
+function fireStop(){
+  FIRE.on = false; if (FIRE.timer){ clearTimeout(FIRE.timer); FIRE.timer = null; }
+  FIRE.nodes.forEach(n => { try { n.stop(); } catch {} try { n.disconnect(); } catch {} });
+  FIRE.nodes = []; FIRE.gain = null;
+}
 function ambPlay(name){
   if (!name || AMB.cur === name){ ambStop(); return; }
   ambStop();
+  if (name === 'feu'){ fireStart(); AMB.cur = 'feu'; updAmbUI(); return; }
   AMB.el = new Audio('audio/' + name + '.ogg'); AMB.el.loop = true; AMB.el.volume = (store.ambVol != null ? store.ambVol : 0.5);
   AMB.el.play().catch(() => {}); AMB.cur = name; updAmbUI();
 }
-function ambStop(){ if (AMB.el){ AMB.el.pause(); AMB.el = null; } AMB.cur = null; updAmbUI(); }
+function ambStop(){ if (AMB.el){ AMB.el.pause(); AMB.el = null; } fireStop(); AMB.cur = null; updAmbUI(); }
 function updAmbUI(){ $$('.amb-btn').forEach(b => b.classList.toggle('on', (b.dataset.amb || '') === (AMB.cur || ''))); }
 function initAmbiance(){
-  const v = $('#ambVol'); if (v){ v.value = Math.round((store.ambVol != null ? store.ambVol : 0.5) * 100); v.oninput = () => { store.ambVol = v.value / 100; if (AMB.el) AMB.el.volume = store.ambVol; persist(); }; }
+  const v = $('#ambVol'); if (v){ v.value = Math.round((store.ambVol != null ? store.ambVol : 0.5) * 100); v.oninput = () => { store.ambVol = v.value / 100; if (AMB.el) AMB.el.volume = store.ambVol; if (FIRE.on && FIRE.gain) FIRE.gain.gain.value = fireVol() * 0.6; persist(); }; }
   $$('.amb-btn').forEach(b => b.onclick = () => ambPlay(b.dataset.amb));
   updAmbUI();
 }
