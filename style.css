@@ -7,7 +7,7 @@
   --ink:#2a1d10; --ink-soft:#6a5230; --line:rgba(140,105,40,.38);
   --shadow:rgba(74,40,20,.14);
   --grain:.05;
-  --amb-veil:rgba(244,234,210,.86);
+  --amb-veil:rgba(244,234,210,.78);
 }
 [data-theme="night"]{
   --ox:#c65b60; --ox-dp:#7a2a30; --gold:#c9a24a; --gold-lt:#e2c477;
@@ -15,7 +15,7 @@
   --ink:#ecdcc0; --ink-soft:#b79f7e; --line:rgba(201,162,74,.28);
   --shadow:rgba(0,0,0,.5);
   --grain:.09;
-  --amb-veil:rgba(15,12,20,.82);
+  --amb-veil:rgba(15,12,20,.74);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
