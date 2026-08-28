@@ -157,10 +157,10 @@ function cerclesValides(present, rng){
 /* ============ PHRASE (indice depuis un trait) ============ */
 const PHRASE = {
   main: { Gaucher: 'est gaucher·ère', Droitier: 'est droitier·ère' },
-  bague: v => `porte ${/^[AEIOUÉ]/i.test(v) ? "l'" + v.toLowerCase() : 'une ' + v.toLowerCase()}`,
+  bague: v => /^aucun/i.test(v) ? 'ne porte aucune bague' : `porte une ${v.toLowerCase()}`,
   cheveux: v => `a les cheveux ${v.toLowerCase()}`,
   silhouette: v => `est de silhouette ${v.toLowerCase()}`,
-  signe: v => `se distingue par ${/^[AEIOUÉ]/i.test(v) ? "l'" + v.toLowerCase() : 'un·e ' + v.toLowerCase()}`,
+  signe: v => /^aucun/i.test(v) ? 'ne présente aucun signe particulier' : `se distingue par ${/^(canne|cicatrice)/i.test(v) ? 'une' : 'un'} ${v.toLowerCase()}`,
 };
 function indiceTxt(dim, val){
   let p; const f = PHRASE[dim];
